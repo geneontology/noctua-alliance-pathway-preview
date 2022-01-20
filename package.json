@@ -9,7 +9,7 @@
     "clean": "rm -r workbenches/noctua-gocam-pathway/public workbenches/noctua-gocam-pathway-beta/public",
     "clean:nf": "rm -r workbenches/noctua-gocam-pathway/public",
     "build": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --prod --index src/inject.tmpl  --base-href  /workbench/noctua-gocam-pathway/ ",
-    "build:beta-test": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --prod --index src/inject.tmpl --output-path workbenches/noctua-gocam-pathway-beta/public --base-href  /workbench/noctua-gocam-pathway-beta/ --configuration=beta-test",
+    "build:beta-test": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --index src/inject.tmpl --output-path workbenches/noctua-gocam-pathway-beta/public --base-href  /workbench/noctua-gocam-pathway-beta/ --configuration=beta-test",
     "start-hmr": "ng serve --configuration hmr -sm=false",
     "start-hmr-sourcemaps": "ng serve --hmr -e=hmr",
     "build-dev": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --dev",
