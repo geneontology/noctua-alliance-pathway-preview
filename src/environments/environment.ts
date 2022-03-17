@@ -46,8 +46,8 @@ const globalKnownRelations = typeof global_known_relations !== 'undefined'
 export const environment = {
   // noctuaTempUrl: 'http://localhost:8910/workbench/noctua-landing-page',
   production: false,
-  isDev: true,
-  isBeta: true,
+  isDev: false,
+  isBeta: false,
   isGraph: false,
   spaqrlApiUrl: 'http://rdf-internal.berkeleybop.io/blazegraph/sparql',
   // spaqrlApiUrl: 'http://rdf.geneontology.org/blazegraph/sparql',
