@@ -20,7 +20,7 @@
             "customWebpackConfig": {
               "path": "./webpack.extra.js"
             },
-            "outputPath": "workbenches/noctua-gocam-pathway/public",
+            "outputPath": "workbenches/noctua-alliance-pathway-preview/public",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
