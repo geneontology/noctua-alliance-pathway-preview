@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation, Input } from '@angular
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Cam, CamService, NoctuaUserService, NoctuaFormConfigService } from 'noctua-form-base';
+import { Cam, CamService, NoctuaUserService, NoctuaFormConfigService } from '@geneontology/noctua-form-base';
 import { MatSidenav } from '@angular/material/sidenav';
 import { NoctuaCommonMenuService } from '@noctua.common/services/noctua-common-menu.service';
+import { WorkbenchId } from '@noctua.common/models/workench-id';
 
 @Component({
     selector: 'noc-noctua-apps',
@@ -13,8 +14,8 @@ import { NoctuaCommonMenuService } from '@noctua.common/services/noctua-common-m
     encapsulation: ViewEncapsulation.None
 })
 export class NoctuaAppsComponent implements OnInit, OnDestroy {
-    @Input('sidenav')
-    sidenav: MatSidenav;
+    WorkbenchId = WorkbenchId;
+    @Input('sidenav') sidenav: MatSidenav;
 
     public cam: Cam;
     date: Date;
@@ -43,7 +44,7 @@ export class NoctuaAppsComponent implements OnInit, OnDestroy {
             });
     }
 
-    createModel(type: 'graph-editor' | 'noctua-form') {
+    createModel(type: WorkbenchId) {
         this.noctuaCommonMenuService.createModel(type);
     }
 
@@ -52,7 +53,7 @@ export class NoctuaAppsComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 }
