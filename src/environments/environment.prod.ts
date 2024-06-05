@@ -45,13 +45,10 @@ const globalKnownRelations = typeof global_known_relations !== 'undefined'
 
 export const environment = {
   production: true,
-  isDev: false,
+  isDev: true,
   isBeta: false,
   isGraph: false,
   spaqrlApiUrl: 'http://rdf-internal.berkeleybop.io/blazegraph/sparql',
-  // spaqrlApiUrl: 'http://rdf.geneontology.org/blazegraph/sparql',
-  // gorestApiUrl: 'https://api.geneontology.cloud/'
-  gorestApiUrl: 'http://localhost:3000/',
   globalGolrNeoServer: golrNeoServer,
   globalGolrServer: golrServer,
   globalMinervaDefinitionName: minervaDefinitionName,
@@ -70,5 +67,6 @@ export const environment = {
 
   amigoTerm: 'http://amigo.geneontology.org/amigo/term/',
   wikidataSparqlUrl: 'https://query.wikidata.org/sparql',
-  pubMedSummaryApi: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id='
+  pubMedSummaryApi: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=',
+  announcementUrl: 'https://raw.githubusercontent.com/geneontology/noctua-announcements/dev/notification.json'
 };

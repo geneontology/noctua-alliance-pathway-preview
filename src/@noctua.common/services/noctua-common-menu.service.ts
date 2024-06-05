@@ -2,11 +2,12 @@ import { environment } from 'environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { MatDrawer, MatSidenav } from '@angular/material/sidenav';
-import { NoctuaGraphService, NoctuaUserService } from 'noctua-form-base';
+import { BbopGraphService, NoctuaUserService } from '@geneontology/noctua-form-base';
 import { LeftPanel, MiddlePanel, RightPanel } from './../models/menu-panels';
 import { PerfectScrollbarDirective } from 'ngx-perfect-scrollbar';
 import { BehaviorSubject } from 'rxjs';
 import { SettingsOptions } from './../models/graph-settings';
+import { WorkbenchId } from '@noctua.common/models/workench-id';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ import { SettingsOptions } from './../models/graph-settings';
 export class NoctuaCommonMenuService {
 
   onCamSettingsChanged: BehaviorSubject<SettingsOptions>;
+  selectedLeftSidenav: LeftPanel = LeftPanel.apps;
   selectedLeftPanel: LeftPanel;
   selectedMiddlePanel: MiddlePanel;
   selectedRightPanel: RightPanel;
@@ -24,7 +26,7 @@ export class NoctuaCommonMenuService {
   private _leftSidenav: MatSidenav;
 
   constructor(
-    private _noctuaGraphService: NoctuaGraphService,
+    private _bbopGraphService: BbopGraphService,
     private noctuaUserService: NoctuaUserService) {
 
     const settings = new SettingsOptions()
@@ -32,26 +34,27 @@ export class NoctuaCommonMenuService {
     this.onCamSettingsChanged = new BehaviorSubject(settings);
   }
 
-  createModel(type: 'graph-editor' | 'noctua-form') {
+  createModel(type: WorkbenchId) {
     const self = this;
 
-    const _newModelBbopManager = this._noctuaGraphService.registerManager();
+    const _newModelBbopManager = this._bbopGraphService.registerManager();
     _newModelBbopManager.register('rebuild', function (resp) { }, 10);
     _newModelBbopManager.add_model().then((resp) => {
       const modelId = resp.data().id;
       let params = new HttpParams();
       params = params.append('model_id', modelId);
       params = params.append('barista_token', self.noctuaUserService.baristaToken);
+
       const paramsString = params.toString();
-
-      const graphEditorUrl = environment.noctuaUrl + '/editor/graph/' + modelId + '?' + paramsString;
-      const noctuaFormUrl = environment.workbenchUrl + 'noctua-form?' + paramsString;
-
-      if (type === 'graph-editor') {
-        window.open(graphEditorUrl, '_blank');
-      } else if (type === 'noctua-form') {
-        window.open(noctuaFormUrl, '_blank');
+      const urls =
+      {
+        [WorkbenchId.GRAPH_EDITOR]: `${environment.noctuaUrl}/editor/graph/${modelId}?${paramsString}`,
+        [WorkbenchId.STANDARD_ANNOTATIONS]: `${environment.workbenchUrl}${WorkbenchId.STANDARD_ANNOTATIONS}?${paramsString}`,
+        [WorkbenchId.FORM]: `${environment.workbenchUrl}${WorkbenchId.FORM}?${paramsString}`,
+        [WorkbenchId.VISUAL_PATHWAY_EDITOR]: `${environment.workbenchUrl}${WorkbenchId.VISUAL_PATHWAY_EDITOR}?${paramsString}`
       }
+
+      window.open(urls[type], '_blank');
     });
   }
 
@@ -61,6 +64,10 @@ export class NoctuaCommonMenuService {
 
   public openLeftSidenav() {
     return this._leftSidenav.open();
+  }
+
+  selectLeftSidenav(panel: LeftPanel) {
+    this.selectedLeftSidenav = panel;
   }
 
 

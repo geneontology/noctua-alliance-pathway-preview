@@ -8,13 +8,19 @@ export enum LeftPanel {
     replace = 'replace',
     artBasket = 'artBasket',
     activityForm = 'activityForm',
-    camForm = 'camForm'
+    camForm = 'camForm',
+    copyModel = 'copyModel',
+    apps = 'apps',
+    announcement = 'announcement',
+    findReplace = 'findReplace',
+    camTermsSummary = 'camTermsSummary',
+    camStats = 'camStats'
 };
 
 export enum MiddlePanel {
     camPreview = 'camPreview',
     camTable = 'camTable',
-    camGraph = 'camGraph'
+    camGraph = 'camGraph',
 };
 
 export enum RightPanel {
@@ -22,6 +28,8 @@ export enum RightPanel {
     activityPreview = 'activityPreview',
     camForm = 'camForm',
     camTable = 'camTable',
-    tripleTable = 'tripleTable',
-    connectorForm = 'connectorForm'
+    activityTable = 'activityTable',
+    activityConnectorTable = 'activityConnectorTable',
+    graphSettings = 'graphSettings',
+    termDetail = 'termDetail'
 }
