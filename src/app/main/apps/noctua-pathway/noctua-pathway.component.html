@@ -69,7 +69,7 @@
     </mat-drawer>
     <mat-drawer-content class="w-100-p h-100-p" fxLayout="column" fxLayoutAlign="start stretch">
       <div *ngIf="modelId" class="noc-gocam-viz-container w-100-p h-100-p" fxLayout="row" fxLayoutAlign="center start">
-        <wc-gocam-viz [attr.gocam-id]="modelId" repository="prod" show-go-cam-selector=false show-has-input=false
+        <wc-gocam-viz [attr.gocam-id]="modelId" [attr.api-url]="apiUrl" show-go-cam-selector=false show-has-input=true
           show-has-output=false show-gene-product=true show-activity=false show-isolated-activity=true>
         </wc-gocam-viz>
       </div>

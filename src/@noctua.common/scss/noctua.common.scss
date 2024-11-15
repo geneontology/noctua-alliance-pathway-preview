@@ -1,3 +1,4 @@
+@use "@angular/material" as mat;
 $primary: map-get($theme, primary);
 $accent: map-get($theme, accent);
 
@@ -8,7 +9,7 @@ $accent: map-get($theme, accent);
 
 .mat-row {
   &:hover {
-    @include mat-elevation(1);
+    @include mat.elevation(1);
     background-color: #f5f5f5;
   }
 
@@ -44,7 +45,7 @@ $accent: map-get($theme, accent);
     padding: 0 12px;
     @include deep-height(40px);
     background-color: #fff;
-    @include mat-elevation(2);
+    @include mat.elevation(2);
     z-index: 1000;
 
     .noc-drawer-header-title {
@@ -94,7 +95,7 @@ $accent: map-get($theme, accent);
     background-color: rgba(map-get($primary, default), 0.7);
     color: #eee;
     @include deep-height(40px);
-    @include mat-elevation(2);
+    @include mat.elevation(2);
     z-index: 1000;
 
     .noc-dialog-header-title {
@@ -176,7 +177,7 @@ $accent: map-get($theme, accent);
   font-size: 12px; //line-height: 20px;
   font-weight: 500;
   @include deep-height(40px);
-  @include mat-elevation(2);
+  @include mat.elevation(2);
   border-bottom: #bbb solid 1px;
   background-color: #fff;
   z-index: 10;
@@ -215,6 +216,38 @@ $accent: map-get($theme, accent);
   .noc-body {
     @include deep-width(100%);
     padding: 10px;
+  }
+}
+
+.noc-comments-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  color: #fff;
+  background-color: #327a37;
+  font-size: 8px;
+  text-align: center;
+  line-height: 15px;
+}
+
+.noc-delete-float-button {
+  visibility: hidden;
+  @include deep-height(20px);
+  @include deep-width(20px);
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  line-height: 15px;
+  color: #ee7979;
+  border-radius: 0;
+
+  &:hover {
+    background-color: #ee7979;
+    color: #fff;
   }
 }
 

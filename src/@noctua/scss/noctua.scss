@@ -13,6 +13,7 @@ $noc-primary-color-light: rgba(#798fb8, 0.3);
 $noc-primary-color-text: #4a8bfc;
 $noc-tree-line-color: rgba(#798fb8, 0.3);
 
+$annotation-primary-color: #754d42;
 //aspect
 $noc-mf: #7cd488;
 $noc-bp: #f4c89c;
@@ -113,6 +114,21 @@ mat-chip {
   @include media-breakpoint("lt-lg") {
     @include deep-width(90%);
   }
+}
+
+.noc-add-evidence-dialog {
+  @include deep-height(200px);
+  @include deep-width(600px);
+}
+
+.noc-confirm-copy-model-dialog {
+  @include deep-height(200px);
+  @include deep-width(600px);
+}
+
+.noc-comments-dialog {
+  @include deep-height(500px);
+  @include deep-width(600px);
 }
 
 .noc-search-evidence-dialog {

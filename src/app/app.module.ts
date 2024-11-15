@@ -3,11 +3,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HttpClientJsonpModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
-import { ContextMenuModule } from 'ngx-contextmenu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NoctuaModule } from '@noctua/noctua.module';
 import { NoctuaProgressBarModule } from '@noctua/components';
-
 import { NoctuaSharedModule } from '@noctua/shared.module';
 import { noctuaConfig } from './noctua-config';
 import { AppComponent } from './app.component';
@@ -33,6 +31,8 @@ import {
     faClipboardList,
     faClone,
     faCog,
+    faComment,
+    faCommentAlt,
     faCopy,
     faExclamationTriangle,
     faHistory,
@@ -60,7 +60,7 @@ import {
     faUser,
     faUsers,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCheckCircle, faTimesCircle } from '@fortawesome/free-regular-svg-icons';
+import { faBell, faCheckCircle, faTimesCircle, faTrashAlt, } from '@fortawesome/free-regular-svg-icons';
 import { faGithub, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { NoctuaDataService } from '@noctua.common/services/noctua-data.service';
@@ -90,7 +90,6 @@ const appRoutes: Routes = [
         RouterModule.forRoot(appRoutes, { relativeLinkResolution: 'legacy' }),
         // Noctua Main and Shared modules
         NoctuaModule.forRoot(noctuaConfig),
-        ContextMenuModule.forRoot(),
         NoctuaSharedModule,
         LayoutModule,
         RouterModule,
@@ -130,6 +129,7 @@ export class AppModule {
             faAngleLeft,
             faAngleRight,
             faBars,
+            faBell,
             faCalendarDay,
             faCalendarWeek,
             faCaretDown,
@@ -140,6 +140,8 @@ export class AppModule {
             faCheckCircle,
             faClipboardList,
             faCog,
+            faComment,
+            faCommentAlt,
             faCopy,
             faClone,
             faExclamationTriangle,
@@ -163,6 +165,7 @@ export class AppModule {
             faSitemap,
             faSortAlphaDown,
             faSortAlphaDownAlt,
+            faTrashAlt,
             faTable,
             faTasks,
             faTimes,
