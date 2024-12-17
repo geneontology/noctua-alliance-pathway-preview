@@ -1,7 +1,5 @@
 
-# Noctua Standard Annotations
-
-
+# Noctua Pathway Viewer
 
 ## Development server
 

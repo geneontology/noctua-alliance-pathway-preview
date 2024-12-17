@@ -202,7 +202,7 @@ export class NoctuaEditorStandardDropdownComponent implements OnInit, OnDestroy 
     switch (category) {
       case EditorCategory.GP_TO_TERM_EDGE:
         this.displaySection.relationship = true;
-        this.relationLabel = this.label = 'GP To Term Relation';
+        this.relationLabel = 'GP To Term Relation';
         this.dynamicForm.get(FormStructureKeys.RELATION).setValue(this.annotationActivity.gpToTermEdge.inverseEntity);
         this.relationshipChoices = this.annotationActivity.gpToTermEdges;
         break;
