@@ -1,11 +1,13 @@
-@import "src/@noctua/scss/noctua";
-@import "src/@noctua.common/scss/noctua.common";
+@use "@angular/material" as mat;
+@import "@noctua/scss/noctua";
+@import "@noctua.common/scss/noctua.common";
 
 :host {
   padding: 0px;
   width: 100%;
 
   wc-gocam-viz {
+    width: 1200px;
     --panel-border-width: 1px;
     --panel-header-background: rgba(0, 0, 0, 0.03);
     --panel-header-padding: 0.5rem 1rem;
@@ -32,7 +34,6 @@
     --graph-padding: 1rem;
 
     background-color: #fff;
-    width: 1000px;
   }
 
   wc-gocam-viz::part(gene-product) {
@@ -56,10 +57,6 @@
     background-color: #e2e2e2;
   }
 
-  .noc-gocam-viz-container {
-    padding: 20px;
-  }
-
   .noc-not-loggedin {
     margin-bottom: 4px;
     padding: 0 10px;
@@ -79,7 +76,7 @@
     background-color: #fff;
     font-size: 12px;
 
-    @include mat-elevation(2);
+    @include mat.elevation(2);
 
     .noc-cam-title {
       max-width: 500px !important;
