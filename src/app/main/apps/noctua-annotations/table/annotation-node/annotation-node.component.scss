@@ -1,6 +1,6 @@
-@import "src/@noctua/scss/noctua";
-@import "src/@noctua.common/scss/noctua.common";
-@import "src/@noctua.common/scss/noctua-form.common";
+@import "@noctua/scss/noctua";
+@import "@noctua.common/scss/noctua.common";
+@import "@noctua.common/scss/noctua-form.common";
 
 $primary: map-get($theme, primary);
 $accent: map-get($theme, accent);
@@ -9,7 +9,30 @@ $accent: map-get($theme, accent);
   padding: 0px;
   width: 100%;
 
+  ul {
+    li:not(:first-child) {
+      border-top: 1px solid #ccc; /* Apply border to the top of all items except the first one */
+    }
+  }
+
   mat-chip {
+    font-weight: normal;
+    @include deep-height(20px);
+    max-width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0;
+    font-size: 10px;
+
+    .noc-chip-label {
+      padding: 0 8px 0 4px;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: none;
+      white-space: nowrap;
+    }
+
     &.default {
       border: $noc-mf solid 2px;
     }
@@ -22,64 +45,22 @@ $accent: map-get($theme, accent);
       border: $noc-cc solid 2px;
     }
 
-    &.noc-extension {
-      border: #9bb1b6 solid 2px;
-      @include deep-height(20px);
-      font-size: 8px;
-      padding: 2px;
-      text-align: center;
+    .noc-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      color: #9c70e2;
+      font-size: 12px;
+      background-color: #ebe7f2;
     }
 
-    &.noc-error-chip {
-      font-size: 10px;
-      font-weight: normal;
-      @include deep-height(25px);
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      padding: 0;
+    @include noc-chip-color(#ccc);
 
-      .noc-chip-label {
-        padding: 0 8px 0 8px;
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        .noc-icon-action {
-          font-size: 10px;
-          background-color: transparent;
-
-          &:hover {
-            font-size: 14px;
-            color: #222;
-          }
-        }
-      }
-
-      .noc-icon,
-      .noc-icon-action {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 25px;
-        width: 25px;
-        border-radius: 50%;
-        color: #777;
-        font-size: 14px;
-      }
-
-      .noc-icon-action {
-        font-size: 10px;
-        background-color: transparent;
-
-        &:hover {
-          font-size: 14px;
-          color: #222;
-          background-color: rgba(#000000, 0.2);
-        }
-      }
-
-      @include noc-chip-color(#e28989);
+    &.noc-date-chip {
+      @include noc-chip-color(#c4bcd9);
     }
   }
 
@@ -135,27 +116,32 @@ $accent: map-get($theme, accent);
         }
       }
 
-      &.noc-term-cell {
-        font-size: 10px;
+      &.noc-extensions-cell {
+        padding-top: 0;
+        padding-bottom: 0;
       }
 
-      &.noc-relation-cell {
-        font-size: 10px;
-      }
-
-      &.noc-extension-cell {
-        font-size: 10px;
+      &.noc-comments-cell {
+        color: rgba(map-get($accent, default), 0.5);
+        .noc-comments-badge {
+          top: 5px;
+          right: 8px;
+        }
+        &.noc-selected {
+          color: map-get($accent, default);
+        }
       }
 
       .noc-edit-button {
-        //: hidden;
+        display: none;
+        visibility: hidden;
         position: absolute;
         bottom: 0;
         right: 0;
       }
 
       .noc-delete-button {
-        //visibility: hidden;
+        visibility: hidden;
         @include deep-height(20px);
         @include deep-width(20px);
         position: absolute;
@@ -167,8 +153,18 @@ $accent: map-get($theme, accent);
         border-radius: 0;
 
         &:hover {
-          background-color: #ee7979;
-          color: #fff;
+          color: #e85454;
+        }
+      }
+
+      .noc-extension-entity {
+        &:hover {
+          .noc-delete-button {
+            visibility: visible;
+          }
+        }
+        &:nth-child(n + 2) {
+          border-top: 1px solid #ccc; // Adjust the color and width as needed
         }
       }
 
@@ -179,8 +175,8 @@ $accent: map-get($theme, accent);
           color: map-get($primary, default);
         }
 
-        .noc-edit-button,
-        .noc-delete-button {
+        .noc-edit-button {
+          display: initial;
           visibility: visible;
         }
       }

@@ -53,11 +53,11 @@ export class DataUtils {
     return [...matchedPredicates];
   }
 
-  public static getObjects(shapes: ShexShapeAssociation[], subjectIds: string[]): string[] {
+  public static getObjects(shapes: ShexShapeAssociation[], subjectIds: string[], predicateId?: string): string[] {
     const objectsSet = new Set<string>();
 
     shapes.forEach(shape => {
-      if (subjectIds.includes(shape.subject)) {
+      if (subjectIds.includes(shape.subject) && (!predicateId || shape.predicate === predicateId)) {
         shape.object.forEach(obj => objectsSet.add(obj));
       }
     });
@@ -97,4 +97,23 @@ export class DataUtils {
 
     return predicates;
   }
+
+
+  public static processHasParticipants(data): any[] {
+    const nodeMap = new Map(data.nodes.map(node => [node.id, node.lbl]));
+
+    return data.edges
+      .filter(edge => edge.pred === "RO:0000057")
+      .map(edge => ({
+        id: edge.obj,
+        label: nodeMap.get(edge.obj) || ''
+      }));
+  }
+
+  public static findCommonItems(itemsA, itemsB) {
+    const idSetB = new Set(itemsB.map(item => item.id));
+
+    return itemsA.filter(item => idSetB.has(item.id));
+  }
+
 }
