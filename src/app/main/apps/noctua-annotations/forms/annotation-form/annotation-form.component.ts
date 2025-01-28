@@ -214,13 +214,11 @@ export class AnnotationFormComponent implements OnInit, OnDestroy {
   }
 
   save() {
-    const self = this;
-
-    self.annotationFormService.saveAnnotation(this.dynamicForm.value)
+    this.annotationFormService.saveAnnotation(this.dynamicForm.value)
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(() => {
-        self.noctuaAnnotationsDialogService.openInfoToast('Annotation successfully created.', 'OK');
-        self.clearForm();
+        this.noctuaAnnotationsDialogService.openInfoToast('Annotation successfully created.', 'OK');
+        this.clearForm();
         if (this.closeDialog) {
           this.closeDialog();
         }
