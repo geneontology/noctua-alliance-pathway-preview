@@ -42,7 +42,6 @@ export class TermAutocompleteComponent implements OnInit, OnDestroy, ControlValu
 
   ngOnInit(): void {
     this.subscribeToValueChanges();
-    console.log(this.control)
   }
 
   ngOnChanges(changes: SimpleChanges): void {

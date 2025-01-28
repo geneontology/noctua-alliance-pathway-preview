@@ -218,6 +218,11 @@ export class NoctuaAnnotationFormService {
     return forkJoin(this.bbopGraphService.addActivity(this.cam, saveData.nodes, saveData.triples, saveData.title));
   }
 
+  saveGPsAnnotation(srcAnnotationActivity: AnnotationActivity, gpIds: string[]) {
+    const saveData = AnnotationActivity.createGPsSave(srcAnnotationActivity, gpIds);
+    return forkJoin(this.bbopGraphService.addActivity(this.cam, saveData.nodes, saveData.triples, ''));
+  }
+
   editAnnotationNode(
     cam: Cam,
     oldNode: ActivityNode,
