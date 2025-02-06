@@ -1,7 +1,6 @@
 import { environment } from './../../environments/environment';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import * as ModelDefinition from './../data/config/model-definition';
 import * as EntityDefinition from './../data/config/entity-definition';
@@ -11,7 +10,7 @@ import { NoctuaFormConfigService } from './config/noctua-form-config.service';
 import { NoctuaLookupService } from './lookup.service';
 import { NoctuaUserService } from './../services/user.service';
 import { Activity, ActivityType, compareActivity } from './../models/activity/activity';
-import { find, each, differenceWith, cloneDeep, uniqWith, chain, filter, uniq } from 'lodash';
+import { find, each, differenceWith, chain, uniq } from 'lodash';
 import { CardinalityViolation, RelationViolation } from './../models/activity/error/violation-error';
 import { CurieService } from './../../@noctua.curie/services/curie.service';
 import { ActivityNode, ActivityNodeType, compareTerm, GoCategory } from './../models/activity/activity-node';
@@ -24,14 +23,12 @@ import { TermsSummary } from './../models/activity/summary';
 import { Article } from './../models/article';
 import { Contributor, equalContributor } from '../models/contributor';
 import * as moment from 'moment';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { graph as bbopGraph } from 'bbop-graph-noctua';
-import { AnnotationActivity } from './../models/activity/annotation-activity';
 
 declare const require: any;
 
 //const model = require('bbop-graph-noctua');
-const barista_client = require('bbop-client-barista');
 const amigo = require('amigo2');
 const barista_response = require('bbop-response-barista');
 const minerva_requests = require('minerva-requests');
@@ -103,6 +100,14 @@ export class BbopGraphService {
       }
     };
 
+    const meta = (resp) => {
+      console.log('Resp meta', resp)
+      console.log(resp.has_undo_p())
+      console.log(resp.has_redo_p())
+
+    }
+
+
     const shieldsUp = () => { };
     const shieldsDown = () => { };
 
@@ -111,35 +116,11 @@ export class BbopGraphService {
     manager.register('manager_error', managerError, 10);
     manager.register('warning', warning, 10);
     manager.register('error', error, 10);
+    manager.register('meta', meta, 10);
 
-    manager.use_reasoner_p(useReasoner);
+    //manager.use_reasoner_p(useReasoner);
 
     return manager;
-  }
-
-  registerBaristaClient(cam: Cam) {
-    const self = this;
-    const barclient = new barista_client(environment.globalBaristaLocation, this.noctuaUserService.baristaToken);
-    //barclient.register('connect', resFunc);
-    //barclient.register('initialization', resFunc);
-    // barclient.register('message', resFunc);
-    //barclient.register('broadcast', resFunc);
-    //barclient.register('clairvoyance', resFunc);
-    //barclient.register('telekinesis', resFunc);
-    barclient.register('merge', function (response) {
-      console.log('barista/merge response');
-      self.onCamMergeSignal(cam, response)
-    });
-    // _on_model_update);
-    barclient.register('rebuild', function (response) {
-      console.log('barista/rebuild response');
-      self.onCamRebuildSignal(cam, response)
-
-    });
-
-    barclient.connect(cam.id);
-
-    return barclient;
   }
 
   getGraphInfo(cam: Cam, modelId) {
@@ -147,7 +128,6 @@ export class BbopGraphService {
 
     cam.loading = new CamLoadingIndicator(true, 'Loading Model Activities ...');
     cam.id = modelId;
-    //cam.baristaClient = this.registerBaristaClient(cam);
     cam.manager = this.registerManager();
     cam.copyModelManager = this.registerManager();
     cam.artManager = this.registerManager();
@@ -203,10 +183,8 @@ export class BbopGraphService {
   }
 
   rebuild(cam: Cam, response) {
-    const self = this;
 
-    // cam.loading.status = true;
-    // cam.loading.message = 'Loading Model Entities Metadata...';
+    cam.response = response;
 
     if (cam.graph) {
       const inGraph = new bbopGraph();
@@ -222,10 +200,6 @@ export class BbopGraphService {
     cam.modified = response.data()['modified-p'];
     cam.isReasoned = response['is-reasoned'];
 
-    if (cam.isReasoned) {
-
-    }
-
     const titleAnnotations = cam.graph.get_annotations_by_key('title');
     const commentAnnotations = cam.graph.get_annotations_by_key('comment');
     const stateAnnotations = cam.graph.get_annotations_by_key('state');
@@ -233,8 +207,8 @@ export class BbopGraphService {
     const groupAnnotations = cam.graph.get_annotations_by_key('providedBy');
     const contributorAnnotations = cam.graph.get_annotations_by_key('contributor');
 
-    cam.contributors = self.noctuaUserService.getContributorsFromAnnotations(contributorAnnotations);
-    cam.groups = self.noctuaUserService.getGroupsFromAnnotations(groupAnnotations);
+    cam.contributors = this.noctuaUserService.getContributorsFromAnnotations(contributorAnnotations);
+    cam.groups = this.noctuaUserService.getGroupsFromAnnotations(groupAnnotations);
 
     if (dateAnnotations.length > 0) {
       cam.date = dateAnnotations[0].value();
@@ -249,11 +223,16 @@ export class BbopGraphService {
     })
 
     if (stateAnnotations.length > 0) {
-      cam.state = self.noctuaFormConfigService.findModelState(stateAnnotations[0].value());
+      cam.state = this.noctuaFormConfigService.findModelState(stateAnnotations[0].value());
     }
 
-    self.loadCam(cam);
-    self.loadViolations(cam, response.data()['validation-results'])
+    if (cam.operation === CamOperation.VIEW_PATHWAY) {
+      this.onCamGraphChanged.next(cam);
+      cam.loading.status = false;
+      return
+    }
+    this.loadCam(cam);
+    this.loadViolations(cam, response.data()['validation-results'])
     cam.loading.status = false;
   }
 
@@ -312,23 +291,22 @@ export class BbopGraphService {
   }
 
   loadCam(cam: Cam, publish = true) {
-    const self = this;
-    const activities = self.graphToActivities(cam.graph);
+    const activities = this.graphToActivities(cam.graph);
 
     if (environment.isGraph) {
-      const molecules = self.graphToMolecules(cam.graph);
+      const molecules = this.graphToMolecules(cam.graph);
 
       activities.push(...molecules);
 
       if (cam.operation === CamOperation.ADD_ACTIVITY) {
-        const activity = self.getAddedActivity(activities, cam.activities);
-        self.onActivityAdded.next(activity);
+        const activity = this.getAddedActivity(activities, cam.activities);
+        this.onActivityAdded.next(activity);
       }
 
       cam.activities = activities;
       cam.updateProperties()
-      cam.causalRelations = self.getCausalRelations(cam);
-      self.getActivityLocations(cam)
+      cam.causalRelations = this.getCausalRelations(cam);
+      this.getActivityLocations(cam)
     } else {
       cam.activities = activities;
       cam.updateProperties()
@@ -340,7 +318,7 @@ export class BbopGraphService {
     cam.operation = CamOperation.NONE;
 
     if (publish) {
-      self.onCamGraphChanged.next(cam);
+      this.onCamGraphChanged.next(cam);
     }
   }
 
@@ -420,7 +398,7 @@ export class BbopGraphService {
 
       result.id = type.class_id();
       result.label = type.class_label();
-      result.classExpression = type;
+      result.classExpression = srcType;
     });
 
     return result;
@@ -1001,6 +979,37 @@ export class BbopGraphService {
     return this.httpClient.post(`${baristaUrl}/api/${globalMinervaDefinitionName}/m3BatchPrivileged`, payload, { headers });
   }
 
+  undoModel(cam: Cam) {
+    const self = this;
+    const reqs = new minerva_requests.request_set(self.noctuaUserService.baristaToken, cam.id);
+
+    reqs.undo_last_model_batch();
+
+    if (self.noctuaUserService.user && self.noctuaUserService.user.groups.length > 0) {
+      //reqs.use_groups([self.noctuaUserService.user.group.id]);
+    }
+    //reqs.store_model(cam.id);
+
+    console.log('undoModel', reqs);
+    console.log('aaaa', cam.manager.get_model_undo_redo(cam.id));
+
+    return cam.manager.request_with(reqs);
+  }
+
+  redoModel(cam: Cam) {
+    const self = this;
+    const reqs = new minerva_requests.request_set(self.noctuaUserService.baristaToken, cam.id);
+
+    reqs.redo_last_model_batch();
+
+    if (self.noctuaUserService.user && self.noctuaUserService.user.groups.length > 0) {
+      reqs.use_groups([self.noctuaUserService.user.group.id]);
+    }
+    reqs.store_model(cam.id);
+
+    return cam.manager.request_with(reqs);
+  }
+
   resetModel(cam: Cam) {
     const self = this;
     const reqs = new minerva_requests.request_set(self.noctuaUserService.baristaToken, cam.id);
@@ -1288,9 +1297,16 @@ export class BbopGraphService {
           triple.predicate.edge.id
         ]);
 
+        if (triple.predicate.comments) {
+          reqs.add_annotation_to_fact('comment', triple.predicate.comments, null,
+            [subject,
+              object,
+              triple.predicate.edge.id]);
+        }
+
         each(triple.predicate.evidence, function (evidence: Evidence) {
-          const evidenceReference = evidence.reference;
-          const evidenceWith = evidence.with;
+          const evidenceReference = Evidence.formatReference(evidence.reference);
+          const evidenceWith = Evidence.formatWithFrom(evidence.with);
 
           reqs.add_evidence(evidence.evidence.id, evidenceReference, evidenceWith, triple.predicate.uuid);
         });
@@ -1326,22 +1342,6 @@ export class BbopGraphService {
     }
 
     return null;
-  }
-
-  editIndividual(reqs, cam: Cam, srcNode, destNode) {
-    if (srcNode.hasValue() && destNode.hasValue()) {
-      reqs.remove_type_from_individual(
-        srcNode.classExpression,
-        srcNode.uuid,
-        cam.id,
-      );
-
-      reqs.add_type_to_individual(
-        class_expression.cls(destNode.getTerm().id),
-        srcNode.uuid,
-        cam.id,
-      );
-    }
   }
 
   bulkEditIndividual(reqs, camId: string, node: ActivityNode) {
@@ -1460,6 +1460,177 @@ export class BbopGraphService {
       }
     })
     localStorage.setItem(`activityLocations-${cam.id}`, JSON.stringify(locations));
+  }
+
+  // Noctua Standard Annotations
+  addExtension(cam: Cam, triple: Triple<ActivityNode>) {
+    const reqs = new minerva_requests.request_set(this.noctuaUserService.baristaToken, cam.id);
+
+    this.addFact(reqs, [triple]);
+
+    reqs.store_model(cam.id);
+    return cam.replaceManager.request_with(reqs);
+  }
+
+
+  deleteAnnotation(cam: Cam, uuids: string[], triples: Triple<ActivityNode>[]) {
+
+    const reqs = new minerva_requests.request_set(this.noctuaUserService.baristaToken, cam.id);
+
+    each(triples, function (triple: Triple<ActivityNode>) {
+      reqs.remove_fact([
+        triple.subject.uuid,
+        triple.object.uuid,
+        triple.predicate.edge.id
+      ]);
+    });
+
+    each(uuids, function (uuid: string) {
+      reqs.remove_individual(uuid);
+    });
+
+    reqs.store_model(cam.id);
+    return cam.replaceManager.request_with(reqs);
+
+  }
+
+  editNode(cam: Cam, oldNode: ActivityNode, newNodeId: string) {
+    const reqs = new minerva_requests.request_set(this.noctuaUserService.baristaToken, cam.id);
+
+    reqs.remove_type_from_individual(
+      oldNode.classExpression,
+      oldNode.uuid,
+      cam.id,
+    );
+
+    let ce
+
+    if (oldNode.isComplement) {
+      ce = new class_expression();
+      ce.as_complement(newNodeId);
+    } else {
+      ce = class_expression.cls(newNodeId)
+    }
+
+    reqs.add_type_to_individual(
+      ce,
+      oldNode.uuid,
+      cam.id,
+    );
+
+    reqs.store_model(cam.id);
+    return cam.replaceManager.request_with(reqs);
+  }
+
+  toggleIsComplement(cam: Cam, oldNode: ActivityNode) {
+    const reqs = new minerva_requests.request_set(this.noctuaUserService.baristaToken, cam.id);
+    const newNodeId = oldNode.term.id;
+
+    reqs.remove_type_from_individual(
+      oldNode.classExpression,
+      oldNode.uuid,
+      cam.id,
+    );
+
+    let ce
+
+    if (oldNode.isComplement) {
+      ce = class_expression.cls(newNodeId)
+    } else {
+      ce = new class_expression();
+      ce.as_complement(newNodeId);
+    }
+
+    reqs.add_type_to_individual(
+      ce,
+      oldNode.uuid,
+      cam.id,
+    );
+
+    reqs.store_model(cam.id);
+    return cam.replaceManager.request_with(reqs);
+  }
+
+
+  editEvidenceCode(cam: Cam, oldEvidenceCodes: Entity[], newEvidenceCode: string) {
+    const reqs = new minerva_requests.request_set(this.noctuaUserService.baristaToken, cam.id);
+
+    oldEvidenceCodes.forEach((code: Entity) => {
+      reqs.remove_type_from_individual(
+        class_expression.cls(code.id),
+        code.uuid,
+        cam.id,
+      );
+
+      reqs.add_type_to_individual(
+        class_expression.cls(newEvidenceCode),
+        code.uuid,
+        cam.id,
+      );
+
+      this.editUserEvidenceAnnotations(reqs, code.uuid)
+    });
+
+    reqs.store_model(cam.id);
+    return cam.replaceManager.request_with(reqs);
+  }
+
+  editReference(cam: Cam, oldReferences: Entity[], newReference: string) {
+    const formattedReference = Evidence.formatReference(newReference);
+    return this._editEvidenceAnnotation(cam, oldReferences, formattedReference, 'source');
+  }
+
+  editWith(cam: Cam, oldWiths: Entity[], newWith: string) {
+    const formattedWith = Evidence.formatWithFrom(newWith);
+
+    return this._editEvidenceAnnotation(cam, oldWiths, formattedWith, 'with');
+  }
+
+  updateAnnotationComments(cam: Cam, predicates: Predicate[], comments: string[]) {
+    const self = this;
+    const reqs = new minerva_requests.request_set(self.noctuaUserService.baristaToken, cam.id);
+
+    predicates.forEach((predicate: Predicate) => {
+
+      const edge = cam.graph.get_edge(predicate.subjectId, predicate.objectId, predicate.edge.id)
+
+      const commentAnnotations = edge.get_annotations_by_key('comment');
+
+      if (edge) {
+        commentAnnotations.forEach(annotation => {
+          reqs.remove_annotation_from_fact('comment', annotation.value(), null,
+            [predicate.subjectId,
+            predicate.objectId,
+            predicate.edge.id]);
+        });
+      }
+
+      reqs.add_annotation_to_fact('comment', comments, null,
+        [predicate.subjectId,
+        predicate.objectId,
+        predicate.edge.id]);
+
+    });
+
+    reqs.store_model(cam.id);
+    return cam.manager.request_with(reqs);
+  }
+
+  private _editEvidenceAnnotation(cam: Cam, oldEntities: Entity[], newAnnotation: string, annotationType: 'source' | 'with') {
+    const reqs = new minerva_requests.request_set(this.noctuaUserService.baristaToken, cam.id);
+
+    oldEntities.forEach((oldEntity: Entity) => {
+      reqs.remove_annotation_from_individual(annotationType, oldEntity.id, null, oldEntity.uuid);
+      reqs.add_annotation_to_individual(annotationType, newAnnotation, null, oldEntity.uuid);
+      this.editUserEvidenceAnnotations(reqs, oldEntity.uuid);
+    });
+
+    if (this.noctuaUserService.user && this.noctuaUserService.user.groups.length > 0) {
+      reqs.use_groups([this.noctuaUserService.user.group.id]);
+    }
+
+    reqs.store_model(cam.id);
+    return cam.replaceManager.request_with(reqs);
   }
 
   private _graphToActivityDFS(camGraph, activity: Activity, bbopEdges, subjectNode: ActivityNode) {

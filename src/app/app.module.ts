@@ -34,7 +34,9 @@ import {
     faComment,
     faCommentAlt,
     faCopy,
+    faDownload,
     faExclamationTriangle,
+    faFileMedical,
     faHistory,
     faInfoCircle,
     faLevelDownAlt,
@@ -45,12 +47,14 @@ import {
     faPaw,
     faPen,
     faPlus,
+    faRedo,
     faSave,
     faSearch,
     faSearchMinus,
     faSearchPlus,
     faShoppingBasket,
     faSitemap,
+    faSortDown,
     faSortAlphaDown,
     faSortAlphaDownAlt,
     faTable,
@@ -59,13 +63,15 @@ import {
     faUndo,
     faUser,
     faUsers,
+    faSortUp,
+    faSort,
 } from '@fortawesome/free-solid-svg-icons';
 import { faBell, faCheckCircle, faTimesCircle, faTrashAlt, } from '@fortawesome/free-regular-svg-icons';
 import { faGithub, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { NoctuaDataService } from '@noctua.common/services/noctua-data.service';
 import { StartupService } from './startup.service';
-import { TreeModule } from '@circlon/angular-tree-component';
+import { TreeModule } from '@ali-hm/angular-tree-component';
 
 export function startup(startupService: StartupService) {
     return () => startupService.loadData();
@@ -87,7 +93,7 @@ const appRoutes: Routes = [
         BrowserAnimationsModule,
         HttpClientModule,
         HttpClientJsonpModule,
-        RouterModule.forRoot(appRoutes, { relativeLinkResolution: 'legacy' }),
+        RouterModule.forRoot(appRoutes),
         // Noctua Main and Shared modules
         NoctuaModule.forRoot(noctuaConfig),
         NoctuaSharedModule,
@@ -144,8 +150,10 @@ export class AppModule {
             faCommentAlt,
             faCopy,
             faClone,
+            faDownload,
             faExclamationTriangle,
             faFacebook,
+            faFileMedical,
             faGithub,
             faHistory,
             faInfoCircle,
@@ -157,6 +165,7 @@ export class AppModule {
             faPaw,
             faPen,
             faPlus,
+            faRedo,
             faSave,
             faSearch,
             faSearchMinus,
@@ -165,6 +174,9 @@ export class AppModule {
             faSitemap,
             faSortAlphaDown,
             faSortAlphaDownAlt,
+            faSortDown,
+            faSortUp,
+            faSort,
             faTrashAlt,
             faTable,
             faTasks,

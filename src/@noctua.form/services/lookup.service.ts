@@ -1,18 +1,21 @@
 import { environment } from './../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { NoctuaFormConfigService } from './config/noctua-form-config.service';
 import { find, filter, each, uniqWith, difference } from 'lodash';
 import { noctuaFormConfig } from './../noctua-form-config';
 import { Article } from './../models/article';
 import { compareEvidenceEvidence, compareEvidenceReference, compareEvidenceWith, Evidence, EvidenceExt } from './../models/activity/evidence';
-import { Group } from './../models/group';
-import { ActivityNode, ActivityNodeType } from './../models/activity/activity-node';
+import { ActivityNode, GoCategory } from './../models/activity/activity-node';
 import { Entity } from './../models/activity/entity';
 import { Predicate } from './../models/activity/predicate';
 import { NoctuaUserService } from './user.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { NoctuaUtils } from '@noctua/utils/noctua-utils';
+import * as ShapeUtils from './../data/config/shape-utils';
+import { GOlrResponse } from './../models/golr';
+import { AutocompleteType } from './../models/autocomplete';
 
 declare const require: any;
 
@@ -21,23 +24,9 @@ const golr_conf = require('golr-conf');
 const gconf = new golr_conf.conf(amigo.data.golr);
 const gserv = environment.globalGolrServer; // "http://golr.berkeleybop.org/";
 const impl_engine = require('bbop-rest-manager').jquery;
-const golr_manager = require('bbop-manager-golr');
 const golr_response = require('bbop-response-golr');
 const engine = new impl_engine(golr_response);
 engine.use_jsonp(true)
-
-interface GOlrResponse {
-  id: string;
-  label: string;
-  link: string;
-  description: string;
-  isObsolete: boolean;
-  replacedBy: string;
-  rootTypes: any[];
-  xref: string;
-  notAnnotatable: boolean;
-}
-
 
 @Injectable({
   providedIn: 'root'
@@ -70,7 +59,7 @@ export class NoctuaLookupService {
   lookupFunc() {
     return {
       termLookup: this.termLookup.bind(this),
-      evidenceLookup: this.evidenceLookup.bind(this)
+      // evidenceLookup: this.evidenceLookup.bind(this)
     };
   }
 
@@ -79,87 +68,96 @@ export class NoctuaLookupService {
     return str.replace(pattern, "\\$1");
   }
 
-  buildQ(str) {
-    const manager = new golr_manager(gserv, gconf, engine, 'async');
+  search(searchText: string, categories: GoCategory[]): Observable<GOlrResponse[]> {
 
-    manager.set_comfy_query(str);
-    return manager.get_query(str);
+    const reqs = ShapeUtils.getTermLookup(categories);
+    return this.termLookup(searchText, reqs.requestParams);
   }
 
   termLookup(searchText, requestParams) {
     const self = this;
-    requestParams.q = self.buildQ(searchText);
+    requestParams.q = NoctuaUtils.formatSolrQueryString(searchText);
     const params = new HttpParams({
       fromObject: requestParams
     });
     const url = this.golrURLBase + params.toString();
 
     return this.httpClient.jsonp(url, 'json.wrf').pipe(
-      map(response => self._lookupMap(response))
+      map(response => {
+        const result = this._lookupMap(response);
+        return result;
+      }),
+      catchError(err => {
+        console.error('Term Lookup Error:', err);
+        return of([]);
+      })
     );
   }
 
-  termPreLookup(type: ActivityNodeType): Entity[] {
-    const self = this;
-
-    const filtered = filter(self.termList, (activityNode: ActivityNode) => {
-      return activityNode.type === type;
-    });
-
-    return filtered.map((activityNode: ActivityNode) => {
-      return activityNode.term;
-    });
+  preLookup(autocompleteType: AutocompleteType, categories: GoCategory[]) {
+    switch (autocompleteType) {
+      case AutocompleteType.TERM:
+        return this.termPreLookup(categories);
+      case AutocompleteType.EVIDENCE_CODE:
+        return this.evidencePreLookup();
+      case AutocompleteType.REFERENCE:
+        return this.referencePreLookup();
+      case AutocompleteType.WITH:
+        return this.withPreLookup();
+      default:
+        return [];
+    }
   }
 
-  evidencePreLookup(): Entity[] {
-    const self = this;
+  termPreLookup(categories: GoCategory[]): GOlrResponse[] {
 
+    if (!categories || categories.length === 0) {
+      return [];
+    }
+
+    const results: GOlrResponse[] = this.termList.map((node) => {
+      return {
+        id: node.term.id,
+        label: node.term.label,
+        rootTypes: node.rootTypes,
+        notAnnotatable: true,
+      } as GOlrResponse;
+
+    }).filter((result) =>
+      result.rootTypes.some((rootType) =>
+        categories.some((category) => category.category === rootType.id)
+      )
+    );;
+
+    return results;
+
+  }
+
+  evidencePreLookup(): GOlrResponse[] {
     const filtered = uniqWith(this.evidenceList, compareEvidenceEvidence);
     return filtered.map((evidence: Evidence) => {
-      return evidence.evidence;
+      return {
+        id: evidence.evidence.id,
+        label: evidence.evidence.label,
+        notAnnotatable: true,
+      } as GOlrResponse;
     });
   }
 
   referencePreLookup(): string[] {
-    const self = this;
 
-    const filtered = uniqWith(self.evidenceList, compareEvidenceReference);
+    const filtered = uniqWith(this.evidenceList, compareEvidenceReference);
     return filtered.map((evidence: Evidence) => {
-      return evidence.reference;
+      return evidence.reference
     });
   }
 
   withPreLookup(): string[] {
-    const self = this;
-
-    const filtered = uniqWith(self.evidenceList, compareEvidenceWith);
+    const filtered = uniqWith(this.evidenceList, compareEvidenceWith);
     return filtered.map((evidence: Evidence) => {
-      return evidence.with;
+      return evidence.with
     });
   }
-
-  evidenceLookup(searchText: string, category: 'reference' | 'with'): string[] {
-    const self = this;
-
-    const filterValue = searchText.toLowerCase();
-    let filteredResults: string[] = [];
-
-    switch (category) {
-      case 'reference':
-        filteredResults = self.referencePreLookup().filter(
-          option => option ? option.toLowerCase().includes(filterValue) : false
-        );
-        break;
-      case 'with':
-        filteredResults = self.withPreLookup().filter(
-          option => option ? option.toLowerCase().includes(filterValue) : false
-        );
-        break;
-    }
-
-    return filteredResults;
-  }
-
 
   companionLookup(gp, aspect, extraParams) {
     const self = this;
@@ -295,7 +293,7 @@ export class NoctuaLookupService {
     const self = this;
 
     const requestParams = {
-      q: self.buildQ(a),
+      q: NoctuaUtils.formatSolrQueryString(a),
       defType: 'edismax',
       indent: 'on',
       qt: 'standard',
@@ -348,7 +346,7 @@ export class NoctuaLookupService {
     const self = this;
 
     const requestParams = {
-      q: self.buildQ(a),
+      q: NoctuaUtils.formatSolrQueryString(a),
       defType: 'edismax',
       indent: 'on',
       qt: 'standard',
@@ -396,6 +394,53 @@ export class NoctuaLookupService {
     );
   }
 
+  getGenesDetails(ids: string[]) {
+
+    const queryString = ids.map(id => `annotation_class:"${id}"`).join(' OR ');
+
+    const requestParams = {
+      q: queryString,
+      defType: 'edismax',
+      indent: 'on',
+      qt: 'standard',
+      wt: 'json',
+      rows: ids.length.toString(),
+      start: '0',
+      fl: 'annotation_class,annotation_class_label,score',
+      'facet': 'true',
+      'facet.mincount': '1',
+      'facet.sort': 'count',
+      'facet.limit': '25',
+      'json.nl': 'arrarr',
+      packet: '1',
+      callback_type: 'search',
+      'facet.field': [
+        'source',
+        'subset',
+        'idspace',
+        'is_obsolete'
+      ],
+      fq: [
+        'document_category:"ontology_class"',
+      ],
+    };
+
+    const params = new HttpParams({
+      fromObject: requestParams
+    });
+
+    const url = this.golrURLBase + params.toString();
+
+    return this.httpClient.jsonp(url, 'json.wrf').pipe(
+      map(response => this._lookupMap(response)),
+      map(response => {
+        const exactMatches = response.filter(result =>
+          ids.includes(result.id)
+        );
+        return exactMatches;
+      })
+    );
+  }
 
   getTermURL(id: string) {
     const self = this;
@@ -493,6 +538,7 @@ export class NoctuaLookupService {
         replacedBy: item.replaced_by,
         rootTypes: self._makeEntitiesArray(item.isa_closure, item.isa_closure_label),
         xref: xref,
+        neighborhoodGraphJson: item.neighborhood_graph_json,
         notAnnotatable: !item.subset?.includes('gocheck_do_not_annotate')
       } as GOlrResponse;
     });

@@ -1,5 +1,5 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 
 
 import {
@@ -14,7 +14,10 @@ import {
   ActivityType,
   Predicate,
   BbopGraphService,
-  AnnotationActivity
+  AnnotationActivity,
+  AnnotationExtension,
+  NoctuaAnnotationFormService,
+  Gene
 } from '@geneontology/noctua-form-base';
 
 import {
@@ -24,7 +27,7 @@ import {
   ShapeDefinition
 } from '@geneontology/noctua-form-base';
 
-import { EditorCategory } from '@noctua.editor/models/editor-category';
+import { EditorCategory, EditorConfig, EditorType } from '@noctua.editor/models/editor-category';
 import { find } from 'lodash';
 import { InlineEditorService } from '@noctua.editor/inline-editor/inline-editor.service';
 import { NoctuaUtils } from '@noctua/utils/noctua-utils';
@@ -32,6 +35,9 @@ import { NoctuaConfirmDialogService } from '@noctua/components/confirm-dialog/co
 import { noctuaAnimations } from '@noctua/animations';
 import { NoctuaFormDialogService } from 'app/main/apps/noctua-form/services/dialog.service';
 import { SettingsOptions } from '@noctua.common/models/graph-settings';
+import { RightPanel } from '@noctua.common/models/menu-panels';
+import { NoctuaCommonMenuService } from '@noctua.common/services/noctua-common-menu.service';
+import { NoctuaAnnotationsDialogService } from '../../services/dialog.service';
 
 @Component({
   selector: 'noc-annotation-node',
@@ -41,6 +47,7 @@ import { SettingsOptions } from '@noctua.common/models/graph-settings';
 })
 export class AnnotationNodeComponent implements OnInit, OnDestroy {
   EditorCategory = EditorCategory;
+  EditorType = EditorType;
   ActivityType = ActivityType;
   activityTypeOptions = noctuaFormConfig.activityType.options;
 
@@ -60,19 +67,24 @@ export class AnnotationNodeComponent implements OnInit, OnDestroy {
 
   evidenceSettings: SettingsOptions = new SettingsOptions();
 
-  private unsubscribeAll: Subject<any>;
+  private _unsubscribeAll: Subject<any>;
 
   constructor(
+    private zone: NgZone,
     public camService: CamService,
     private bbopGraphService: BbopGraphService,
+    public annotationFormService: NoctuaAnnotationFormService,
+    private noctuaAnnotationsDialogService: NoctuaAnnotationsDialogService,
     private confirmDialogService: NoctuaConfirmDialogService,
     public noctuaUserService: NoctuaUserService,
     public noctuaFormConfigService: NoctuaFormConfigService,
     private noctuaFormDialogService: NoctuaFormDialogService,
     public noctuaActivityEntityService: NoctuaActivityEntityService,
     public noctuaActivityFormService: NoctuaActivityFormService,
+    public noctuaCommonMenuService: NoctuaCommonMenuService,
+
     private inlineEditorService: InlineEditorService) {
-    this.unsubscribeAll = new Subject();
+    this._unsubscribeAll = new Subject();
   }
 
   ngOnInit(): void {
@@ -81,23 +93,6 @@ export class AnnotationNodeComponent implements OnInit, OnDestroy {
     this.evidenceSettings.showGroup = false;
     this.evidenceSettings.showContributor = false;
 
-  }
-
-  editEntity(entity: ActivityNode) {
-
-    const data = {
-      cam: this.cam,
-      activity: this.annotationActivity.activity,
-      entity: entity,
-      category: EditorCategory.all,
-      evidenceIndex: 0,
-      insertEntity: true
-    };
-
-    this.camService.onCamChanged.next(this.cam);
-    this.camService.activity = this.annotationActivity.activity;
-    this.noctuaActivityEntityService.initializeForm(this.annotationActivity.activity, entity);
-    this.inlineEditorService.open(this.currentMenuEvent.target, { data });
   }
 
   toggleExpand(activity: Activity) {
@@ -114,93 +109,11 @@ export class AnnotationNodeComponent implements OnInit, OnDestroy {
     this.noctuaFormDialogService.openCamErrorsDialog(errors);
   }
 
-
-  addEvidence(entity: ActivityNode) {
-    const self = this;
-
-    entity.predicate.addEvidence();
-    const data = {
-      cam: this.cam,
-      activity: this.annotationActivity.activity,
-      entity: entity,
-      category: EditorCategory.evidenceAll,
-      evidenceIndex: entity.predicate.evidence.length - 1
-    };
-
-    this.camService.onCamChanged.next(this.cam);
-    this.camService.activity = this.annotationActivity.activity;
-    this.noctuaActivityEntityService.initializeForm(this.annotationActivity.activity, entity);
-    this.inlineEditorService.open(this.currentMenuEvent.target, { data });
-
-    self.noctuaActivityFormService.initializeForm();
-  }
-
-
   removeEvidence(entity: ActivityNode, index: number) {
     const self = this;
 
     entity.predicate.removeEvidence(index);
     self.noctuaActivityFormService.initializeForm();
-  }
-
-  toggleIsComplement() {
-
-  }
-
-  openSearchDatabaseDialog(entity: ActivityNode) {
-    const self = this;
-    const gpNode = this.noctuaActivityFormService.activity.gpNode;
-
-    if (gpNode) {
-      const data = {
-        readonly: false,
-        gpNode: gpNode.term,
-        aspect: entity.aspect,
-        entity: entity,
-        params: {
-          term: '',
-          evidence: ''
-        }
-      };
-
-      const success = function (selected) {
-        if (selected.term) {
-          entity.term = new Entity(selected.term.term.id, selected.term.term.label);
-
-          if (selected.evidences && selected.evidences.length > 0) {
-            entity.predicate.setEvidence(selected.evidences);
-          }
-          self.noctuaActivityFormService.initializeForm();
-        }
-      };
-
-      self.noctuaFormDialogService.openSearchDatabaseDialog(data, success);
-    } else {
-      // const error = new ActivityError(ErrorLevel.error, ErrorType.general,  "Please enter a gene product", meta)
-      //errors.push(error);
-      // self.dialogService.openActivityErrorsDialog(ev, entity, errors)
-    }
-  }
-
-
-  insertEntity(entity: ActivityNode, predExpr: ShapeDefinition.PredicateExpression) {
-    const insertedNode = this.noctuaFormConfigService.insertActivityNodeShex(this.annotationActivity.activity, entity, predExpr);
-
-    //  this.noctuaActivityFormService.initializeForm();
-
-    const data = {
-      cam: this.cam,
-      activity: this.annotationActivity.activity,
-      entity: insertedNode,
-      category: EditorCategory.all,
-      evidenceIndex: 0,
-      insertEntity: true
-    };
-
-    this.camService.onCamChanged.next(this.cam);
-    this.camService.activity = this.annotationActivity.activity;
-    this.noctuaActivityEntityService.initializeForm(this.annotationActivity.activity, insertedNode);
-    this.inlineEditorService.open(this.currentMenuEvent.target, { data });
   }
 
   addRootTerm(entity: ActivityNode) {
@@ -224,39 +137,65 @@ export class AnnotationNodeComponent implements OnInit, OnDestroy {
     }
   }
 
-  clearValues(entity: ActivityNode) {
-    const self = this;
-
-    entity.clearValues();
-    self.noctuaActivityFormService.initializeForm();
-  }
-
-  openSelectEvidenceDialog(entity: ActivityNode) {
-    const self = this;
-    const evidences: Evidence[] = this.camService.getUniqueEvidence(self.noctuaActivityFormService.activity);
-    const success = (selected) => {
-      if (selected.evidences && selected.evidences.length > 0) {
-        entity.predicate.setEvidence(selected.evidences);
-        self.noctuaActivityFormService.initializeForm();
-      }
+  addExtension() {
+    const data: EditorConfig = {
+      cam: this.cam,
+      annotationActivity: this.annotationActivity,
+      category: EditorCategory.ADD_EXTENSION,
+      editorType: EditorType.STANDARD
     };
 
-    self.noctuaFormDialogService.openSelectEvidenceDialog(evidences, success);
+    this.inlineEditorService.open(this.currentMenuEvent.target, { data });
   }
 
-  openCommentsForm(entity: ActivityNode) {
+  addComment() {
+    const data: EditorConfig = {
+      cam: this.cam,
+      annotationActivity: this.annotationActivity,
+      category: EditorCategory.ADD_COMMENT,
+      editorType: EditorType.STANDARD
+    };
+
+    this.inlineEditorService.open(this.currentMenuEvent.target, { data });
+  }
+
+  toggleIsComplement() {
     const self = this;
 
-    const success = (comments) => {
-      if (comments) {
-        this.bbopGraphService.savePredicateComments(self.cam, entity.predicate, comments);
-      }
+    const success = () => {
+      this.annotationFormService.toggleIsComplement(self.annotationActivity)
+        .pipe(takeUntil(self._unsubscribeAll))
+        .subscribe(() => {
+          self.zone.run(() => {
+            self.noctuaFormDialogService.openInfoToast('NOT Qualifier successfully updated.', 'OK');
+            self.camService.getCam(this.cam.id);
+          });
+        });
     };
-    self.noctuaFormDialogService.openCommentsDialog(entity.predicate, success)
+    this.confirmDialogService.openConfirmDialog('Confirm Update?',
+      'You are about to update NOT Qualifier.',
+      success);
   }
 
   updateCurrentMenuEvent(event) {
     this.currentMenuEvent = event;
+  }
+
+  addGenes() {
+
+    const success = (genes: Gene[]) => {
+      const geneIds = genes.map(gene => gene.id);
+
+      this.annotationFormService.saveGPsAnnotation(this.annotationActivity, geneIds)
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe(() => {
+          this.noctuaAnnotationsDialogService.openInfoToast(`${geneIds.length} Annotation(s) successfully created.`, 'OK');
+        });
+    };
+
+    const data = { annotationActivity: this.annotationActivity };
+    this.noctuaAnnotationsDialogService.openUploadGenesDialog(data, success);
+
   }
 
   deleteAnnotation() {
@@ -282,9 +221,39 @@ export class AnnotationNodeComponent implements OnInit, OnDestroy {
     }
   }
 
+  deleteExtension(extension: AnnotationExtension) {
+    const self = this;
+
+    const success = () => {
+      this.annotationFormService.deleteExtension(self.annotationActivity, extension)
+        .pipe(takeUntil(self._unsubscribeAll))
+        .subscribe(() => {
+          self.zone.run(() => {
+            self.noctuaFormDialogService.openInfoToast('Annotation Extension successfully deleted.', 'OK');
+            self.camService.getCam(this.cam.id);
+          });
+        });
+    };
+    this.confirmDialogService.openConfirmDialog('Confirm Delete?',
+      'You are about to delete an extension.',
+      success);
+
+  }
+
+  copyToForm() {
+    this.annotationFormService.onFormAnnotationActivityChanged.next(this.annotationActivity);
+  }
+
+  openComments(annotationActivity: AnnotationActivity) {
+    this.annotationFormService.selectCommentActivityId(annotationActivity.id);
+    this.noctuaCommonMenuService.selectRightPanel(RightPanel.COMMENTS);
+    this.noctuaCommonMenuService.openRightDrawer();
+    this.noctuaCommonMenuService.closeLeftDrawer();
+  }
+
   ngOnDestroy(): void {
-    this.unsubscribeAll.next(null);
-    this.unsubscribeAll.complete();
+    this._unsubscribeAll.next(null);
+    this._unsubscribeAll.complete();
   }
 
   cleanId(dirtyId: string) {

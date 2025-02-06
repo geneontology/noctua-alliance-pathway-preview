@@ -260,6 +260,15 @@ export class Evidence {
 
     return result;
   }
+
+  public static formatWithFrom(value: string) {
+    if (!value) {
+      return value;
+    }
+
+    const formatted = value.replace(/\s+/g, "");
+    return formatted;
+  }
 }
 
 export function compareEvidence(a: Evidence, b: Evidence) {

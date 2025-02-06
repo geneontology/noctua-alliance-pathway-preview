@@ -19,6 +19,8 @@ $noc-mf: #7cd488;
 $noc-bp: #f4c89c;
 $noc-cc: #d3b5f5;
 
+$primary: map-get($theme, primary);
+
 .ps__rail-x {
   top: 3px;
   top: initial !important;
@@ -99,6 +101,11 @@ mat-chip {
   }
 }
 
+.noc-confirm-dialog {
+  @include deep-height(200px);
+  @include deep-width(600px);
+}
+
 .noc-link-to-existing-dialog {
   @include deep-width(1100px);
 
@@ -167,11 +174,34 @@ mat-chip {
   }
 }
 
+.noc-add-genes-dialog {
+  @include deep-height(90%);
+  @include deep-width(800px);
+
+  @include media-breakpoint("lt-lg") {
+    @include deep-width(90%);
+  }
+}
+
 .noc-cams-unsaved-dialog {
   @include deep-width(600px);
 
   @include media-breakpoint("sm") {
     @include deep-width(100%);
+  }
+}
+
+.noc-evidence-db-trigger {
+  @include deep-height(20px);
+  @include deep-width(20px);
+
+  @include noc-icon-size(12px);
+}
+
+.mat-mdc-raised-button {
+  &.noc-primary {
+    color: #eee;
+    background-color: map-get($primary, default);
   }
 }
 
@@ -197,8 +227,17 @@ textarea {
   resize: none !important;
   overflow: hidden;
 }
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: $noc-primary-color !important;
+}
 
+// mat-label focused style
+.mat-form-field.mat-focused .mat-form-field-label {
+  color: $noc-primary-color !important;
+}
 .mat-form-field {
+  //mat-input focused color
+
   .mat-form-field-wrapper {
     padding-bottom: 0;
   }
@@ -212,8 +251,57 @@ textarea {
       font-size: 12px;
     }
 
+    .mat-select {
+      height: 26px;
+      line-height: 14px;
+
+      .mat-select-value-text {
+        white-space: normal;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
     textarea {
       @include deep-height(26px);
+    }
+  }
+}
+
+.noc-genes-textarea {
+  &.mat-form-field {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .mat-form-field {
+      height: 100%;
+    }
+
+    .mat-form-field-wrapper {
+      height: 100%;
+    }
+
+    .mat-text-field-wrapper {
+      height: 100%;
+    }
+
+    .mat-form-field-flex {
+      height: 100%;
+    }
+
+    .mat-form-field-infix {
+      height: 100%;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    textarea.mat-input-element {
+      height: 100% !important;
+      resize: none;
+      box-sizing: border-box;
     }
   }
 }

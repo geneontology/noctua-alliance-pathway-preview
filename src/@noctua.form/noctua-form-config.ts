@@ -1,6 +1,7 @@
 import { environment } from './../environments/environment';
 import { Entity, RootTypes } from './models/activity/entity';
 import vpeJson from './data/vpe-decision.json'
+import { AnnotationActivitySortField } from './models/standard-annotation/annotation-activity-sortby';
 
 export interface SAEdgeDefinition {
   gpToTermPredicate: string;
@@ -232,9 +233,9 @@ const simpleAnnotationEdgeConfig: SAConfigEdgeMap = {
     mfNodeRequired: true
   },
   [inverseEdge.isActiveIn.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.occursIn.id,
-    mfNodeRequired: true
+    gpToTermPredicate: edge.isActiveIn.id,
+    mfNodeRequired: false,
+    gpToTermReverse: false
   },
   [inverseEdge.actsUpstreamOf.id]: {
     gpToTermPredicate: edge.enabledBy.id,
@@ -294,6 +295,42 @@ export const noctuaFormConfig = {
       'date': {
         'id': 'date',
         'label': 'Annotation Date'
+      }
+    }
+  },
+  annotationActivitySortField: {
+    options: {
+      [AnnotationActivitySortField.GP]: {
+        id: AnnotationActivitySortField.GP,
+        label: 'Gene Product (default)'
+      },
+      [AnnotationActivitySortField.GOTERM]: {
+        id: AnnotationActivitySortField.GOTERM,
+        label: 'GO Term'
+      },
+      [AnnotationActivitySortField.GP_TO_TERM_EDGE]: {
+        id: AnnotationActivitySortField.GP_TO_TERM_EDGE,
+        label: 'GP to Term Edge'
+      },
+      [AnnotationActivitySortField.GO_TERM_ASPECT]: {
+        id: AnnotationActivitySortField.GO_TERM_ASPECT,
+        label: 'GO Term Aspect'
+      },
+      [AnnotationActivitySortField.EVIDENCE_CODE]: {
+        id: AnnotationActivitySortField.EVIDENCE_CODE,
+        label: 'Evidence Code'
+      },
+      [AnnotationActivitySortField.REFERENCE]: {
+        id: AnnotationActivitySortField.REFERENCE,
+        label: 'Reference'
+      },
+      [AnnotationActivitySortField.WITH]: {
+        id: AnnotationActivitySortField.WITH,
+        label: 'With'
+      },
+      [AnnotationActivitySortField.DATE]: {
+        id: AnnotationActivitySortField.DATE,
+        label: 'Date'
       }
     }
   },
@@ -514,6 +551,7 @@ export const noctuaFormConfig = {
 
   ccOnlyEdges: [
     edge.locatedIn.id,
+    edge.isActiveIn.id,
     edge.partOf.id,
     edge.contributesTo.id,
   ],

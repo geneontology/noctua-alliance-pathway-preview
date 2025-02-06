@@ -11,14 +11,15 @@ import { CamForm } from './../models/forms/cam-form';
 import { ActivityFormMetadata } from './../models/forms/activity-form-metadata';
 import { Evidence, compareEvidence } from './../models/activity/evidence';
 import { Cam, CamStats } from './../models/activity/cam';
-import { differenceWith, each, find, groupBy, uniqWith } from 'lodash';
-import { ActivityNodeType, ActivityNode, compareActivity, Entity, CamLoadingIndicator, CamQueryMatch, ReloadType, TermsSummary } from './../models/activity';
+import { each, find, groupBy, uniqWith } from 'lodash';
+import { ActivityNodeType, ActivityNode, Entity, CamLoadingIndicator, CamQueryMatch, ReloadType, TermsSummary, CamOperation } from './../models/activity';
 import { compareTerm } from './../models/activity/activity-node';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { noctuaFormConfig } from './../noctua-form-config';
-import { DataGeneratorUtils } from './../data/data-generator-utils';
+import { DataUtils } from './../data/config/data-utils';
+import { GeneList } from './../models';
 
 declare const require: any;
 
@@ -105,10 +106,11 @@ export class CamService {
   }
 
   //Gets a new cam
-  getCam(modelId): Cam {
+  getCam(modelId, camOperation: CamOperation = CamOperation.NONE): Cam {
     const cam: Cam = new Cam();
 
     this.cam = cam;
+    this.cam.operation = camOperation;
 
     cam.graph = null;
     cam.id = modelId;
@@ -191,12 +193,18 @@ export class CamService {
 
   addCamAnnotationActivities(cam: Cam) {
 
-    cam.annotationActivities = cam.activities.map((activity: Activity) => {
+    const annotationActivities = [];
+
+    for (const activity of cam.activities) {
       const annotationActivity = this.noctuaFormConfigService.activityToAnnotation(activity);
 
-      annotationActivity.activity = activity;
-      return annotationActivity
-    });
+      if (annotationActivity) {
+        annotationActivity.activity = activity;
+        annotationActivities.push(annotationActivity);
+      }
+    }
+
+    cam.annotationActivities = annotationActivities;
 
     // For data generation purposes e2e testing
 
@@ -226,24 +234,34 @@ export class CamService {
     return self._bbopGraphService.deleteActivity(self.cam, deleteData.uuids, deleteData.triples);
   }
 
-  updateTermList(formActivity: Activity, entity: ActivityNode) {
+  updateTermList(formActivity?: Activity, entity?: ActivityNode) {
     this.noctuaLookupService.termList = this.getUniqueTerms(formActivity);
-    entity.termLookup.results = this.noctuaLookupService.termPreLookup(entity.type);
+
+    if (entity) {
+      entity.termLookup.results = this.noctuaLookupService.termPreLookup(entity.category);
+    }
   }
 
-  updateEvidenceList(formActivity: Activity, entity: ActivityNode) {
+  updateEvidenceList(formActivity?: Activity, entity?: ActivityNode) {
     this.noctuaLookupService.evidenceList = this.getUniqueEvidence(formActivity);
-    entity.predicate.evidenceLookup.results = this.noctuaLookupService.evidencePreLookup();
+    if (entity) {
+      entity.predicate.evidenceLookup.results = this.noctuaLookupService.evidencePreLookup();
+    }
   }
 
-  updateReferenceList(formActivity: Activity, entity: ActivityNode) {
+  updateReferenceList(formActivity?: Activity, entity?: ActivityNode) {
     this.noctuaLookupService.evidenceList = this.getUniqueEvidence(formActivity);
-    entity.predicate.referenceLookup.results = this.noctuaLookupService.referencePreLookup();
+
+    if (entity) {
+      entity.predicate.referenceLookup.results = this.noctuaLookupService.referencePreLookup();
+    }
   }
 
-  updateWithList(formActivity: Activity, entity: ActivityNode) {
+  updateWithList(formActivity?: Activity, entity?: ActivityNode) {
     this.noctuaLookupService.evidenceList = this.getUniqueEvidence(formActivity);
-    entity.predicate.withLookup.results = this.noctuaLookupService.withPreLookup();
+    if (entity) {
+      entity.predicate.withLookup.results = this.noctuaLookupService.withPreLookup();
+    }
   }
 
   getNodesByType(activityType: ActivityNodeType): any[] {
@@ -283,6 +301,20 @@ export class CamService {
 
     return self._bbopGraphService.resetModel(cam);
   }
+
+  undoModel(cam: Cam) {
+    const self = this;
+
+    return self._bbopGraphService.undoModel(cam);
+  }
+
+  redoModel(cam: Cam) {
+    const self = this;
+
+    return self._bbopGraphService.redoModel(cam);
+  }
+
+
 
   reviewChangesCam(cam: Cam, stats: CamStats): boolean {
     return cam.reviewCamChanges(stats);
@@ -550,7 +582,59 @@ export class CamService {
       cam.displayNumber = (key + 1).toString();
       cam.updateActivityDisplayNumber();
     });
+  }
 
+  updateMFProperties(cam: Cam) {
+    cam.activities.forEach((activity: Activity) => {
+      if (activity.mfNode?.term.id) {
+        this.noctuaLookupService.getTermDetail(activity.mfNode.term.id)
+          .subscribe((res) => {
+            if (!Array.isArray(res) && res.neighborhoodGraphJson) {
+              const parsed = JSON.parse(res.neighborhoodGraphJson);
+              console.log(parsed);
+              const objs = DataUtils.processHasParticipants(parsed);
+              activity.mfNode.chemicalParticipants = objs;
+              console.log(objs);
+            }
+          });
+      }
+    });
+  }
+
+  getGenesDetails(ids: string[]): Observable<GeneList> {
+    return this.noctuaLookupService.getGenesDetails(ids).pipe(
+      map(response => {
+        const result = new GeneList();
+        ids.forEach(id => {
+          const match = response.find(r => r.id === id);
+
+          if (match) {
+            if (match.label) {
+              // Found gene with label
+              result.genes.push({
+                id: match.id,
+                label: match.label
+              });
+            } else {
+              // Found gene but no label
+              result.nonMatchingGenes.push({
+                id: match.id
+              });
+            }
+          } else {
+            // ID not found in response
+            result.identifiersNotMatched.push(id);
+          }
+        });
+
+        // Update total count
+        result.count = result.genes.length +
+          result.nonMatchingGenes.length +
+          result.identifiersNotMatched.length;
+
+        return result;
+      })
+    );
   }
 
   private _compareDateReviewAdded(a: Cam, b: Cam): number {
@@ -560,6 +644,4 @@ export class CamService {
       return -1;
     }
   }
-
-
 }
