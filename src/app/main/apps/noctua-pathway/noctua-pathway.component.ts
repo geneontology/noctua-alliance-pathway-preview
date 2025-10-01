@@ -3,18 +3,16 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import {
   ActivityType,
-  BbopGraphService,
   Cam,
   CamOperation,
   CamService,
   Contributor,
-  LeftPanel,
-  MiddlePanel,
   NoctuaFormConfigService,
+  NoctuaGraphService,
   NoctuaUserService,
-  RightPanel
 } from '@geneontology/noctua-form-base'
 import { CamToolbarOptions } from '@noctua.common/models/cam-toolbar-options';
+import { LeftPanel, MiddlePanel, RightPanel } from '@noctua.common/models/menu-panels';
 import { NoctuaCommonMenuService } from '@noctua.common/services/noctua-common-menu.service';
 import { environment } from 'environments/environment';
 import { Subject } from 'rxjs';
@@ -50,7 +48,7 @@ export class NoctuaPathwayComponent implements OnInit, AfterViewInit, OnDestroy 
   constructor(
     private route: ActivatedRoute,
     private camService: CamService,
-    private _bbopGraphService: BbopGraphService,
+    private _bbopGraphService: NoctuaGraphService,
     public noctuaUserService: NoctuaUserService,
     public noctuaFormConfigService: NoctuaFormConfigService,
     public noctuaCommonMenuService: NoctuaCommonMenuService) {
@@ -97,7 +95,6 @@ export class NoctuaPathwayComponent implements OnInit, AfterViewInit, OnDestroy 
           if (!cam || cam.id !== this.cam.id) return;
           this.cam = cam;
 
-          console.log('cam', cam.response?._data);
           vizElement.setModelData(cam.response?._data);
         });
     }

@@ -7,6 +7,16 @@ export class NoctuaFormUtils {
         return dirtyId;
     }
 
+    public static generateGUID() {
+        function S4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+
+        return S4() + S4();
+    }
+
     public static pad(pad: string, count: number) {
         let counter = 0;
         let result = ''
@@ -41,15 +51,5 @@ export class NoctuaFormUtils {
     public static splitAndAppend(str, delim, count) {
         const arr = str.split(delim);
         return [...arr.splice(0, count), arr.join(delim)];
-    }
-
-    public static areArraysEqualByKey(a: any[], b: any[], key: string): boolean {
-        if (!a || !b) {
-            return false;
-        }
-        if (a.length !== b.length) {
-            return false;
-        }
-        return a.every((item, index) => item[key] === b[index][key]);
     }
 }

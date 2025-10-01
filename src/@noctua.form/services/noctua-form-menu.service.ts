@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
-import { LeftPanel, MiddlePanel, RightPanel } from './../models/menu-panels';
+import { LeftPanel, MiddlePanel, RightPanel } from '@noctua.common/models/menu-panels';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class NoctuaFormMenuService {
   private rightDrawer: MatDrawer;
 
   constructor() {
-    this.selectedMiddlePanel = MiddlePanel.CAM_TABLE;
+    this.selectedMiddlePanel = MiddlePanel.camTable;
   }
 
   selectLeftPanel(panel: LeftPanel) {

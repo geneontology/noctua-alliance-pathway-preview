@@ -16,7 +16,7 @@ import {
 
 import { referenceDropdownData } from './reference-dropdown.tokens';
 import { ReferenceDropdownOverlayRef } from './reference-dropdown-ref';
-import { NoctuaFormDialogService } from 'app/main/apps/noctua-form/services/dialog.service';
+import { NoctuaFormDialogService } from 'app/main/apps/noctua-form';
 
 @Component({
   selector: 'noc-reference-dropdown',

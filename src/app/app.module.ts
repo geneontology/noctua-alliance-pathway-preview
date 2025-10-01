@@ -1,6 +1,6 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HttpClientJsonpModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withJsonpSupport } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -34,9 +34,7 @@ import {
     faComment,
     faCommentAlt,
     faCopy,
-    faDownload,
     faExclamationTriangle,
-    faFileMedical,
     faHistory,
     faInfoCircle,
     faLevelDownAlt,
@@ -47,14 +45,12 @@ import {
     faPaw,
     faPen,
     faPlus,
-    faRedo,
     faSave,
     faSearch,
     faSearchMinus,
     faSearchPlus,
     faShoppingBasket,
     faSitemap,
-    faSortDown,
     faSortAlphaDown,
     faSortAlphaDownAlt,
     faTable,
@@ -63,8 +59,6 @@ import {
     faUndo,
     faUser,
     faUsers,
-    faSortUp,
-    faSort,
 } from '@fortawesome/free-solid-svg-icons';
 import { faBell, faCheckCircle, faTimesCircle, faTrashAlt, } from '@fortawesome/free-regular-svg-icons';
 import { faGithub, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
@@ -88,12 +82,11 @@ const appRoutes: Routes = [
     declarations: [
         AppComponent
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [
+        AppComponent
+    ], imports: [BrowserModule,
         BrowserAnimationsModule,
-        HttpClientModule,
-        HttpClientJsonpModule,
-        RouterModule.forRoot(appRoutes),
+        RouterModule.forRoot(appRoutes, {}),
         // Noctua Main and Shared modules
         NoctuaModule.forRoot(noctuaConfig),
         NoctuaSharedModule,
@@ -102,25 +95,19 @@ const appRoutes: Routes = [
         MatSidenavModule,
         NoctuaProgressBarModule,
         TreeModule,
-
         //Material 
         MatSidenavModule,
-
         //Noctua App 
-        AppsModule
-    ],
-    providers: [
-        StartupService,
-        {
-            provide: APP_INITIALIZER,
-            useFactory: startup,
-            deps: [StartupService, NoctuaDataService],
-            multi: true
-        }
-    ],
-    bootstrap: [
-        AppComponent
-    ]
+        AppsModule], providers: [
+            StartupService,
+            {
+                provide: APP_INITIALIZER,
+                useFactory: startup,
+                deps: [StartupService, NoctuaDataService],
+                multi: true
+            },
+            provideHttpClient(withInterceptorsFromDi(), withJsonpSupport())
+        ]
 })
 
 export class AppModule {
@@ -150,10 +137,8 @@ export class AppModule {
             faCommentAlt,
             faCopy,
             faClone,
-            faDownload,
             faExclamationTriangle,
             faFacebook,
-            faFileMedical,
             faGithub,
             faHistory,
             faInfoCircle,
@@ -165,7 +150,6 @@ export class AppModule {
             faPaw,
             faPen,
             faPlus,
-            faRedo,
             faSave,
             faSearch,
             faSearchMinus,
@@ -174,9 +158,6 @@ export class AppModule {
             faSitemap,
             faSortAlphaDown,
             faSortAlphaDownAlt,
-            faSortDown,
-            faSortUp,
-            faSort,
             faTrashAlt,
             faTable,
             faTasks,

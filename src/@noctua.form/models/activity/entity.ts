@@ -1,12 +1,11 @@
 import { NoctuaFormUtils } from './../../utils/noctua-form-utils';
 
 
-export enum RootTypes {
-  COMPLEX = 'complex',
-  MF = 'mf',
-  BP = 'bp',
-  CC = 'cc',
-}
+
+
+
+
+
 
 export enum EntityType {
   ACTIVITY_NODE = 'activity_node',
@@ -34,8 +33,6 @@ export class Entity implements EntityBase {
 
   private _uuid: string = null;
 
-  inverseEntity: Entity
-
   constructor(public id: string,
     public label: string,
     public url?: string,
@@ -55,7 +52,9 @@ export class Entity implements EntityBase {
   }
 
   set uuid(uuid: string) {
-    this._uuid = uuid;
+    if (uuid) {
+      this._uuid = uuid;
+    }
     this.displayId = 'noc-node-' + NoctuaFormUtils.cleanID(uuid);
   }
 

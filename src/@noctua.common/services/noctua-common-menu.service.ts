@@ -2,7 +2,7 @@ import { environment } from 'environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { MatDrawer, MatSidenav } from '@angular/material/sidenav';
-import { BbopGraphService, NoctuaUserService } from '@geneontology/noctua-form-base';
+import { NoctuaGraphService, NoctuaUserService } from '@geneontology/noctua-form-base';
 import { LeftPanel, MiddlePanel, RightPanel } from './../models/menu-panels';
 import { PerfectScrollbarDirective } from 'ngx-perfect-scrollbar';
 import { BehaviorSubject } from 'rxjs';
@@ -15,7 +15,7 @@ import { WorkbenchId } from '@noctua.common/models/workench-id';
 export class NoctuaCommonMenuService {
 
   onCamSettingsChanged: BehaviorSubject<SettingsOptions>;
-  selectedLeftSidenav: LeftPanel = LeftPanel.apps;
+  selectedLeftSidenav: LeftPanel;
   selectedLeftPanel: LeftPanel;
   selectedMiddlePanel: MiddlePanel;
   selectedRightPanel: RightPanel;
@@ -26,7 +26,7 @@ export class NoctuaCommonMenuService {
   private _leftSidenav: MatSidenav;
 
   constructor(
-    private _bbopGraphService: BbopGraphService,
+    private _noctuaGraphService: NoctuaGraphService,
     private noctuaUserService: NoctuaUserService) {
 
     const settings = new SettingsOptions()
@@ -37,7 +37,7 @@ export class NoctuaCommonMenuService {
   createModel(type: WorkbenchId) {
     const self = this;
 
-    const _newModelBbopManager = this._bbopGraphService.registerManager();
+    const _newModelBbopManager = this._noctuaGraphService.registerManager();
     _newModelBbopManager.register('rebuild', function (resp) { }, 10);
     _newModelBbopManager.add_model().then((resp) => {
       const modelId = resp.data().id;
@@ -49,7 +49,6 @@ export class NoctuaCommonMenuService {
       const urls =
       {
         [WorkbenchId.GRAPH_EDITOR]: `${environment.noctuaUrl}/editor/graph/${modelId}?${paramsString}`,
-        [WorkbenchId.STANDARD_ANNOTATIONS]: `${environment.workbenchUrl}${WorkbenchId.STANDARD_ANNOTATIONS}?${paramsString}`,
         [WorkbenchId.FORM]: `${environment.workbenchUrl}${WorkbenchId.FORM}?${paramsString}`,
         [WorkbenchId.VISUAL_PATHWAY_EDITOR]: `${environment.workbenchUrl}${WorkbenchId.VISUAL_PATHWAY_EDITOR}?${paramsString}`
       }

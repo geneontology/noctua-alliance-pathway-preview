@@ -1,20 +1,40 @@
 import {
+    ActivityNode,
     ActivityNodeType,
-    GoCategory
+    ActivityNodeDisplay,
+    GoCategory,
+    categoryToClosure
 } from './../../models/activity/activity-node';
+import { EntityLookup } from './../..//models/activity/entity-lookup';
+import { Predicate } from './../../models/activity/predicate';
 
+const baseRequestParams = {
+    defType: 'edismax',
+    indent: 'on',
+    qt: 'standard',
+    wt: 'json',
+    rows: '50',
+    start: '0',
+    packet: '1',
+    callback_type: 'search',
+    //fl: ['annotation_class'],
+    qf: [
+        'annotation_class^3',
+        'annotation_class_label_searchable^5.5',
+        'description_searchable^1',
+        'comment_searchable^0.5',
+        'synonym_searchable^1',
+        'alternate_id^1',
+        'isa_closure^1',
+        'isa_closure_label_searchable^1'
+    ],
+    _: Date.now()
+};
 
 export const ObsoleteTerm = {
     id: null,
     category: 'true',
     categoryType: 'is_obsolete',
-} as GoCategory;
-
-export const GPProteinContainingComplex = {
-    id: ActivityNodeType.GoProteinContainingComplex,
-    category: 'GO:0032991',
-    categoryType: 'isa_closure',
-    suffix: `OR NOT idspace:"GO"`,
 } as GoCategory;
 
 export const GoProteinContainingComplex = {
@@ -28,12 +48,6 @@ export const GoCellularComponent = {
     category: 'GO:0005575',
     categoryType: 'isa_closure',
     suffix: `OR NOT ${GoProteinContainingComplex.categoryType}:"${GoProteinContainingComplex.category}"`,
-} as GoCategory;
-
-export const GoRootCellularComponent = {
-    id: ActivityNodeType.GoCellularComponent,
-    category: 'GO:0005575',
-    categoryType: 'isa_closure',
 } as GoCategory;
 
 export const GoAllCellularComponent = {
@@ -70,6 +84,7 @@ export const GoChemicalEntity = {
     id: ActivityNodeType.GoChemicalEntity,
     category: 'CHEBI:24431',
     categoryType: 'isa_closure',
+    suffix: `OR NOT ${GoMolecularEntity.categoryType}:"${GoMolecularEntity.category}"`,
 } as GoCategory;
 
 export const GoEvidence = {
@@ -86,20 +101,20 @@ export const GoEvidenceNode = {
 
 export const GoCellTypeEntity = {
     id: ActivityNodeType.GoCellTypeEntity,
-    category: 'CL:0000003',
+    category: 'CL:0000000',
     categoryType: 'isa_closure',
 } as GoCategory;
 
 export const GoAnatomicalEntity = {
     id: ActivityNodeType.GoAnatomicalEntity,
-    category: 'CARO:0000000',
+    category: 'UBERON:0001062',
     categoryType: 'isa_closure',
 } as GoCategory;
 
 export const GoOrganism = {
     id: ActivityNodeType.GoOrganism,
-    category: 'NCBITaxon',
-    categoryType: 'idspace',
+    category: 'NCBITaxon:1',
+    categoryType: 'isa_closure',
 } as GoCategory;
 
 export const GoBiologicalPhase = {
@@ -113,3 +128,48 @@ export const UberonStage = {
     category: 'UBERON:0000105',
     categoryType: 'isa_closure',
 } as GoCategory;
+
+export const generateBaseTerm = (goCategories: GoCategory[], override: Partial<ActivityNodeDisplay> = {}): ActivityNode => {
+    const activityNode = new ActivityNode();
+    const predicate = new Predicate(null);
+    const fqTermCategory = categoryToClosure(goCategories);
+    const fqEvidenceCategory = categoryToClosure([GoEvidence]);
+
+    predicate.setEvidenceMeta('eco', Object.assign({}, JSON.parse(JSON.stringify(baseRequestParams)), {
+        fq: [
+            'document_category:"ontology_class"',
+            fqEvidenceCategory
+        ],
+    }));
+
+    activityNode.predicate = predicate;
+
+    if (goCategories && goCategories.length > 0) {
+        activityNode.termLookup = new EntityLookup(null,
+            Object.assign({}, JSON.parse(JSON.stringify(baseRequestParams)), {
+                fq: [
+                    'document_category:"ontology_class"',
+                    fqTermCategory
+                ],
+            })
+        );
+    }
+
+    activityNode.overrideValues(override);
+
+    return activityNode;
+};
+
+
+
+export const setEvidenceLookup = (predicate: Predicate): void => {
+    const fqEvidenceCategory = categoryToClosure([GoEvidence]);
+
+    predicate.setEvidenceMeta('eco', Object.assign({}, JSON.parse(JSON.stringify(baseRequestParams)), {
+        fq: [
+            'document_category:"ontology_class"',
+            fqEvidenceCategory
+        ],
+    }));
+};
+

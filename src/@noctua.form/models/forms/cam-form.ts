@@ -2,6 +2,7 @@ import { FormArray, FormControl } from '@angular/forms';
 import { Cam } from './../activity/cam';
 import { Contributor } from './../contributor';
 import { ActivityFormMetadata } from './../forms/activity-form-metadata';
+
 export class CamForm {
   title = new FormControl();
   state = new FormControl();
