@@ -8,5 +8,12 @@ if (environment.production) {
   enableProdMode();
 }
 
+import { defineCustomElements } from '@geneontology/wc-gocam-viz/loader';
+defineCustomElements();
+
+if (environment.production) {
+  enableProdMode();
+}
+
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.log(err));

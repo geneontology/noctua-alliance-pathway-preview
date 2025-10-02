@@ -314,6 +314,7 @@ export class NoctuaFormConfigService {
     modelInfo.gpadUrl = environment.noctuaUrl + '/download/' + modelId + '/gpad';
     modelInfo.noctuaFormUrl = environment.workbenchUrl + 'noctua-form?' + paramsString;
     modelInfo.noctuaVPEUrl = environment.workbenchUrl + 'noctua-visual-pathway-editor?' + paramsString;
+    modelInfo.noctuaSAEUrl = environment.workbenchUrl + 'noctua-standard-annotations?' + paramsString;
     modelInfo.pathwayViewerUrl = environment.workbenchUrl + 'noctua-alliance-pathway-preview?' + paramsString;
     modelInfo.annotationPreviewUrl = environment.workbenchUrl + 'annpreview?' + paramsString;
 
