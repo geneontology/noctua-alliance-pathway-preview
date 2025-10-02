@@ -63,8 +63,6 @@ export class ActivityFormTableNodeComponent implements OnInit, OnDestroy {
 
   optionsDisplay: any = {}
 
-  termEditable = true
-
   editableTerms = false;
   currentMenuEvent: any = {};
 
@@ -84,14 +82,14 @@ export class ActivityFormTableNodeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    // this.termEditable = (this.activity.activityType !== ActivityType.bpOnly) && this.entity.term.id !== noctuaFormConfig.rootNode.mf.id
-
     if (this.options?.editableTerms) {
       this.editableTerms = this.options.editableTerms
     }
 
     this.optionsDisplay = { ...this.options, hideHeader: true };
     this.relationWidth = 250 - (this.entity.treeLevel) * 16 + 'px';
+
+    console.log('settings', this.settings);
 
   }
 
@@ -118,7 +116,7 @@ export class ActivityFormTableNodeComponent implements OnInit, OnDestroy {
       cam: this.cam,
       activity: this.activity,
       entity: entity,
-      category: EditorCategory.EVIDENCE_ALL,
+      category: EditorCategory.evidenceAll,
       evidenceIndex: entity.predicate.evidence.length - 1
     };
 
@@ -160,7 +158,7 @@ export class ActivityFormTableNodeComponent implements OnInit, OnDestroy {
 
   openSearchDatabaseDialog(entity: ActivityNode) {
     const self = this;
-    const gpNode = this.activity.gpNode;
+    const gpNode = this.activity.getGPNode();
 
     if (gpNode && gpNode.hasValue()) {
       const data = {
@@ -199,14 +197,15 @@ export class ActivityFormTableNodeComponent implements OnInit, OnDestroy {
   }
 
 
-  insertEntity(entity: ActivityNode, predExpr: ShapeDefinition.PredicateExpression) {
-    const insertedNode = this.noctuaFormConfigService.insertActivityNodeShex(this.activity, entity, predExpr);
+  insertEntity(entity: ActivityNode, nodeDescription: ShapeDefinition.ShapeDescription) {
+    const insertedNode = this.noctuaFormConfigService.insertActivityNode(this.activity, entity, nodeDescription);
+    //  this.noctuaActivityFormService.initializeForm();
 
     const data = {
       cam: this.cam,
       activity: this.activity,
       entity: insertedNode,
-      category: EditorCategory.ALL,
+      category: EditorCategory.all,
       evidenceIndex: 0,
       insertEntity: true
     };
@@ -223,7 +222,7 @@ export class ActivityFormTableNodeComponent implements OnInit, OnDestroy {
       cam: this.cam,
       activity: this.activity,
       entity: entity,
-      category: EditorCategory.ALL,
+      category: EditorCategory.all,
       evidenceIndex: 0,
       insertEntity: true
     };

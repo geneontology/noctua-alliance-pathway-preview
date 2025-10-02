@@ -1,6 +1,8 @@
 import { cloneDeep } from "lodash";
 import { ShexShapeAssociation } from "../shape";
 import shapeTerms from './../shape-terms.json'
+import allowedDBs from './../with-form-prefix.json'
+import { Entity } from "./../../models/activity/entity";
 
 export class DataUtils {
 
@@ -21,58 +23,19 @@ export class DataUtils {
     return result;
   }
 
-  public static getPredicates(shapes: ShexShapeAssociation[], subjectIds?: string[], objectIds?: string[], excludeFromExtension = true): string[] {
-    const matchedPredicates = new Set<string>();
-
-    // If neither subjectIds nor objectIds is provided, return all predicates
-    if (!subjectIds && !objectIds) {
-      shapes.forEach((shape) => {
-
-        if (excludeFromExtension) {
-          if (!shape.exclude_from_extensions) {
-            matchedPredicates.add(shape.predicate);
-          }
-        } else {
-          matchedPredicates.add(shape.predicate);
-        }
-
-      });
-
-      return [...matchedPredicates];
-    }
-
-    shapes.forEach((shape) => {
-      const subjectMatch = !subjectIds || subjectIds.length === 0 || subjectIds.includes(shape.subject);
-      const objectMatch = !objectIds || objectIds.length === 0 || shape.object.some(objId => objectIds.includes(objId));
-
-      if (subjectMatch && objectMatch && shape.exclude_from_extensions !== excludeFromExtension) {
-        matchedPredicates.add(shape.predicate);
-      }
-    });
-
-    return [...matchedPredicates];
-  }
-
-  public static getObjects(shapes: ShexShapeAssociation[], subjectIds: string[], predicateId?: string): string[] {
-    const objectsSet = new Set<string>();
-
-    shapes.forEach(shape => {
-      if (subjectIds.includes(shape.subject) && (!predicateId || shape.predicate === predicateId)) {
-        shape.object.forEach(obj => objectsSet.add(obj));
-      }
-    });
-
-    return [...objectsSet];
-  }
-
-
-  public static getSubjectShapes(shapes: ShexShapeAssociation[], subjectId, excludeFromExtensions = true): ShexShapeAssociation[] {
+  public static getSubjectShapes(shapes: ShexShapeAssociation[], subjectId): ShexShapeAssociation[] {
     return shapes.filter(shape => {
-      if (!excludeFromExtensions) {
-        return shape.subject === subjectId
-      }
       return shape.subject === subjectId && !shape.exclude_from_extensions;
     });
+  }
+
+  public static getPredicates(shapes: ShexShapeAssociation[]): string[] {
+    const predicates = shapes.map((shape) => {
+      return shape.predicate
+    });
+
+    return [...new Set(predicates)]
+
   }
 
   public static getRangeBySubject(shapes: ShexShapeAssociation[], subjectId: string, predicateId: string): ShexShapeAssociation {
@@ -90,12 +53,19 @@ export class DataUtils {
       })
 
       const result = cloneDeep(lookupTable[shape.predicate])
-      result['rangeLabel'] = range.join(', ');
+
+      if (result) {
+        result['rangeLabel'] = range.join('/');
+      } else {
+        result['rangeLabel'] = '';
+      }
 
       return result;
+
     });
 
     return predicates;
+
   }
 
 
@@ -116,4 +86,90 @@ export class DataUtils {
     return itemsA.filter(item => idSetB.has(item.id));
   }
 
+  public static findItemsNotInB(listA, listB) {
+    const idSetB = new Set(listB.map(item => item.id));
+
+    return listA.filter(item => !idSetB.has(item.id));
+  }
+
+  public static mergeUniqueLists(...lists: Entity[][]): Entity[] {
+    const uniqueMap = new Map<string, Entity>();
+
+    for (const list of lists) {
+      for (const item of list) {
+        if (!uniqueMap.has(item.id)) {
+          uniqueMap.set(item.id, item);
+        }
+      }
+    }
+
+    return Array.from(uniqueMap.values());
+  }
+
+
+  public static validateDatabaseIdentifiers(input: string): string | null {
+
+    const identifiers = input.split(/[,|]/);
+    const allowedLowerCase = new Set(allowedDBs.map(db => db.toLowerCase()));
+
+    for (const identifier of identifiers) {
+      const trimmed = identifier.trim();
+      if (!trimmed) continue; // Skip empty entries
+
+      const colonIndex = trimmed.indexOf(':');
+      if (colonIndex === -1) {
+        return `Invalid format: "${trimmed}" - expected format is "DATABASE:accession"`;
+      }
+
+      const dbPrefix = trimmed.substring(0, colonIndex);
+      const dbPrefixLower = dbPrefix.toLowerCase();
+
+      if (!allowedLowerCase.has(dbPrefixLower)) {
+        return `Invalid database prefix: "${dbPrefix}" is not part of allowed entities`;
+      }
+    }
+
+    return null; // All identifiers are valid
+  }
+
+  public static correctDatabaseIdentifierCase(input: string): string {
+    const parts = input.split(/([,|])/);
+
+    const caseMap = new Map<string, string>();
+    allowedDBs.forEach(db => {
+      caseMap.set(db.toLowerCase(), db);
+    });
+
+    const correctedParts = parts.map(part => {
+      if (part === ',' || part === '|') {
+        return part;
+      }
+
+      const trimmed = part.trim();
+      if (!trimmed) return part;
+
+      // Extract database prefix and accession
+      const colonIndex = trimmed.indexOf(':');
+      if (colonIndex === -1) {
+        return part; // Return original if invalid format
+      }
+
+      const dbPrefix = trimmed.substring(0, colonIndex);
+      const accession = trimmed.substring(colonIndex);
+      const dbPrefixLower = dbPrefix.toLowerCase();
+
+      // Get the correct case from our map
+      const correctCase = caseMap.get(dbPrefixLower);
+      if (correctCase) {
+        // Preserve any leading/trailing whitespace from original part
+        const leadingSpace = part.match(/^\s*/)?.[0] || '';
+        const trailingSpace = part.match(/\s*$/)?.[0] || '';
+        return leadingSpace + correctCase + accession + trailingSpace;
+      }
+
+      return part; // Return original if not found in allowed list
+    });
+
+    return correctedParts.join('');
+  }
 }

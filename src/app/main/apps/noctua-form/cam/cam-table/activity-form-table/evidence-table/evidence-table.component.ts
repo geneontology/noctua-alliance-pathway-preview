@@ -82,7 +82,7 @@ export class EvidenceFormTableComponent implements OnInit, OnDestroy {
       cam: this.cam,
       activity: this.activity,
       entity: entity,
-      category: EditorCategory.EVIDENCE_ALL,
+      category: EditorCategory.evidenceAll,
       evidenceIndex: entity.predicate.evidence.length - 1
     };
 

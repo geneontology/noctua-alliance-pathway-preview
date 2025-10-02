@@ -10,8 +10,6 @@ import { each, find, orderBy } from 'lodash';
 import { NoctuaFormUtils } from './../../utils/noctua-form-utils';
 import { Violation } from './error/violation-error';
 import { PendingChange } from './pending-change';
-import { AnnotationActivity } from '../standard-annotation/annotation-activity';
-import { AnnotationActivitySortBy, AnnotationActivitySortField } from '../standard-annotation/annotation-activity-sortby';
 
 export enum ReloadType {
   RESET = 'reset',
@@ -28,7 +26,7 @@ export enum CamOperation {
   NONE = 'none',
   ADD_ACTIVITY = 'add_activity',
   ADD_CAUSAL_RELATION = 'add_causal_relation',
-  VIEW_PATHWAY = 'view_pathway',
+  VIEW_PATHWAY = 'view_pathway'
 }
 
 export class CamQueryMatch {
@@ -126,12 +124,11 @@ export class Cam {
   groups: Group[] = [];
   contributors: Contributor[] = [];
   groupId: any;
+  groupIds = []; // for checking group
   expanded = false;
   model: any;
-  //connectorActivities: ConnectorActivity[] = [];
   causalRelations: Triple<Activity>[] = [];
   sortBy: CamSortBy = new CamSortBy();
-  annotationActivitySortBy: AnnotationActivitySortBy = new AnnotationActivitySortBy();
   error = false;
   date: string;
   modified = false;
@@ -146,13 +143,9 @@ export class Cam {
   rebuildRule = new CamRebuildRule();
 
   //bbop graphs
-  response;
   graph;
-  storedGraph;
-  pendingGraph;
 
   // bbop managers 
-  baristaClient;
   engine;
   manager;
   copyModelManager;
@@ -187,25 +180,15 @@ export class Cam {
   manualLayout = false;
   layoutChanged = false;
 
-
-  private _annotationActivities: AnnotationActivity[] = [];
   private _filteredActivities: Activity[] = [];
   private _activities: Activity[] = [];
   private _storedActivities: Activity[] = [];
   private _id: string;
 
+  //bbops
+  response: any;
+
   constructor() {
-    const sortByData = localStorage.getItem('annotationActivitySortBy');
-    if (sortByData) {
-      const parsedData = JSON.parse(sortByData);
-      if (parsedData.field && parsedData.label && typeof parsedData.ascending === 'boolean') {
-        this.annotationActivitySortBy = {
-          field: parsedData.field,
-          label: parsedData.label,
-          ascending: parsedData.ascending
-        };
-      }
-    }
   }
 
   get id() {
@@ -215,14 +198,6 @@ export class Cam {
   set id(id: string) {
     this._id = id;
     this.displayId = NoctuaFormUtils.cleanID(id);
-  }
-
-  get annotationActivities(): AnnotationActivity[] {
-    return AnnotationActivity.sortBy(this._annotationActivities, this.annotationActivitySortBy);
-  }
-
-  set annotationActivities(srcActivities: AnnotationActivity[]) {
-    this._annotationActivities = srcActivities;
   }
 
   get activities() {
@@ -267,46 +242,6 @@ export class Cam {
     });
 
     this._storedActivities = srcActivities;
-  }
-
-  updateSortBy(field: ActivitySortField, label: string) {
-    this.sortBy.field = field
-    this.sortBy.label = label
-  }
-
-  updateAnnotationActivitySortBy(field: AnnotationActivitySortField, label: string, ascending?: boolean) {
-    this.annotationActivitySortBy.field = field
-    this.annotationActivitySortBy.label = label
-    if (ascending !== undefined) {
-      this.annotationActivitySortBy.ascending = ascending
-    }
-
-    const data = { field, label, ascending: this.annotationActivitySortBy.ascending };
-    localStorage.setItem('annotationActivitySortBy', JSON.stringify(data));
-  }
-
-  updateAnnotationActivitySortDirection() {
-
-    this.annotationActivitySortBy.ascending = !this.annotationActivitySortBy.ascending;
-
-    const data = {
-      field: this.annotationActivitySortBy.field,
-      label: this.annotationActivitySortBy.label,
-      ascending: this.annotationActivitySortBy.ascending
-    };
-    localStorage.setItem('annotationActivitySortBy', JSON.stringify(data));
-  }
-
-  toggleExpand() {
-    this.expanded = !this.expanded;
-  }
-
-  expandAllActivities(expand: boolean) {
-    const self = this;
-
-    each(self.activities, (activity: Activity) => {
-      activity.expanded = expand;
-    });
   }
 
   getCausalRelation(subjectId: string, objectId: string): Triple<Activity> {
@@ -431,34 +366,6 @@ export class Cam {
         if (match) {
           self._filteredActivities.push(activity);
         }
-      });
-    }
-  }
-
-  applyWeights(weight = 0) {
-    const self = this;
-
-    if (self.queryMatch && self.queryMatch.terms.length > 0) {
-
-      each(self.activities, (activity: Activity) => {
-        each(activity.nodes, (node: ActivityNode) => {
-          const matchNode = find(self.queryMatch.terms, { uuid: node.term.uuid }) as Entity;
-
-          if (matchNode) {
-            matchNode.weight = node.term.weight = weight;
-            weight++;
-          }
-
-          each(node.predicate.evidence, (evidence: Evidence) => {
-            const matchNode = find(self.queryMatch.terms, { uuid: evidence.referenceEntity.uuid }) as Entity;
-
-            if (matchNode) {
-              matchNode.weight = evidence.referenceEntity.weight = weight;
-              weight++;
-            }
-          });
-        });
-
       });
     }
   }
@@ -630,7 +537,7 @@ export class Cam {
   updateProperties() {
     const self = this;
 
-    each(self._activities, (activity: Activity, key) => {
+    each(self.activities, (activity: Activity, key) => {
       activity.updateProperties()
     });
 

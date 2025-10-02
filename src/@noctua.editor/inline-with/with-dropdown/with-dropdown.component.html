@@ -1,6 +1,7 @@
-<form [formGroup]="myForm" novalidate class="pl-8 pr-8 w-full" fxLayout="column" fxLayoutAlign="start stretch">
-  <div formArrayName="companies" class="noc-form-secion w-full" fxLayout="column" fxLayoutAlign="start stretch">
-    <!--     <div class="w-full" fxLayout="row" fxLayoutAlign="start center">
+<form [formGroup]="myForm" novalidate class="pl-8 pr-8 w-100-p" fxLayout="column" fxLayoutAlign="start stretch">
+  <div formArrayName="companies" class="noc-form-secion w-100-p" fxLayout="column" fxLayoutAlign="start stretch"
+    noctuaPerfectScrollbar>
+    <!--     <div class="w-100-p" fxLayout="row" fxLayoutAlign="start center">
     <mat-form-field appearance="outline" fxFlex="100px" class="noc-sm  mr-12">
       <mat-select placeholder="" formControlName="db">
         <mat-option *ngFor="let evidenceDB of noctuaFormConfigService.evidenceDBs.options" [value]="evidenceDB">
@@ -8,7 +9,7 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field appearance="outline" fxFlex="" class="noc-sm w-full">
+    <mat-form-field appearance="outline" fxFlex="" class="noc-sm w-100-p">
       <input matInput formControlName="accession" type="text" placeholder="Accession" autocomplete="off">
     </mat-form-field>
     <button mat-icon-button (click)="add()">
@@ -18,13 +19,13 @@
       <mat-icon>check_circle</mat-icon>
     </button>
   </div>
-  <div class="w-full" ngFor="let item of myForm.get('items').controls; let i=index;">
+  <div class="w-100-p" ngFor="let item of myForm.get('items').controls; let i=index;">
     <div class="drag-container">
       <div class="section-heading">Week {{week.id}}</div>
       <div cdkDropList id="{{week.id}}" [cdkDropListData]="week.weeklist" [cdkDropListConnectedTo]="connectedTo"
         class="item-list" (cdkDropListDropped)="drop($event)">
         <div class="item-box" *ngFor="let weekItem of week.weeklist" cdkDrag>
-          <mat-form-field appearance="outline" fxFlex="" class="noc-sm w-full">
+          <mat-form-field appearance="outline" fxFlex="" class="noc-sm w-100-p">
             <input matInput type="text" [value]="weekItem" (ngModel)="weekItem" placeholder="Accession"
               autocomplete="off">
             </mat-form-field>
@@ -34,55 +35,55 @@
     </div> -->
 
     @for (comp of myForm.get('companies')?.controls; track comp; let i = $index) {
-    <div class="noc-with-group">
-      <div [formGroupName]="i">
-        <div formArrayName="projects">
-          @for (project of comp.get('projects').controls; track project; let j = $index) {
-          <div>
-            <div [formGroupName]="j">
-              <mat-form-field appearance="outline" fxFlex="" class="noc-sm w-full">
-                <input matInput formControlName="projectName" type="text" placeholder="Accession" autocomplete="off"
-                  [matAutocomplete]="withAuto">
-              </mat-form-field>
-              <button mat-icon-button (click)="addNewProject(comp.controls.projects)">
-                <mat-icon>add</mat-icon>
-              </button>
-              <button mat-icon-button (click)="deleteProject(comp.controls.projects, j)">
-                <mat-icon>delete_forever</mat-icon>
-              </button>
+      <div class="noc-with-group">
+        <div [formGroupName]="i">
+          <div formArrayName="projects">
+            @for (project of comp.get('projects').controls; track project; let j = $index) {
+              <div>
+                <div [formGroupName]="j">
+                  <mat-form-field appearance="outline" fxFlex="" class="noc-sm w-100-p">
+                    <input matInput formControlName="projectName" type="text" placeholder="Accession" autocomplete="off"
+                      [matAutocomplete]="withAuto">
+                    </mat-form-field>
+                    <button mat-icon-button (click)="addNewProject(comp.controls.projects)">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="deleteProject(comp.controls.projects, j)">
+                      <mat-icon>delete_forever</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+              @if (comp.get('projects').controls.length===0) {
+                <div class="p-16">
+                  <a (click)="addNewProject(comp.controls.projects)">
+                    Add With/From
+                  </a>
+                </div>
+              }
             </div>
           </div>
-          }
-          @if (comp.get('projects').controls.length===0) {
-          <div class="p-16">
-            <a (click)="addNewProject(comp.controls.projects)">
-              Add With/From
-            </a>
-          </div>
-          }
         </div>
-      </div>
-    </div>
-    }
-    <mat-autocomplete #withAuto="matAutocomplete">
-      @for (option of filteredOptions | async; track option) {
-      <mat-option [value]="option">
-        {{option}}
-      </mat-option>
       }
-    </mat-autocomplete>
-    <button mat-button (click)="addNewCompany()">Add Group</button><br><br>
+      <mat-autocomplete #withAuto="matAutocomplete">
+        @for (option of filteredOptions | async; track option) {
+          <mat-option [value]="option">
+            {{option}}
+          </mat-option>
+        }
+      </mat-autocomplete>
+      <button mat-button (click)="addNewCompany()">Add Group</button><br><br>
 
 
 
-    <!--   <pre>{{myForm.value | json}}</pre> -->
-  </div>
-  <div class="w-full" fxLayout="row" fxLayoutAlign="end center">
-    <button mat-icon-button (click)="close()">
-      Cancel
-    </button>
-    <button mat-icon-button color="primary" (click)="save()">
-      Ok
-    </button>
-  </div>
-</form>
+      <!--   <pre>{{myForm.value | json}}</pre> -->
+    </div>
+    <div class="w-100-p" fxLayout="row" fxLayoutAlign="end center">
+      <button mat-icon-button (click)="close()">
+        Cancel
+      </button>
+      <button mat-icon-button color="primary" (click)="save()">
+        Ok
+      </button>
+    </div>
+  </form>

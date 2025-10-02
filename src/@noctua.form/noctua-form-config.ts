@@ -1,18 +1,6 @@
 import { environment } from './../environments/environment';
-import { Entity, RootTypes } from './models/activity/entity';
+import { Entity } from './models/activity/entity';
 import vpeJson from './data/vpe-decision.json'
-import { AnnotationActivitySortField } from './models/standard-annotation/annotation-activity-sortby';
-
-export interface SAEdgeDefinition {
-  gpToTermPredicate: string;
-  mfToTermPredicate?: string;
-  mfNodeRequired: boolean;
-  gpToTermReverse?: boolean;
-}
-
-export type SAConfigEdgeMap = {
-  [key: string]: SAEdgeDefinition;
-};
 
 const edge = {
   placeholder: {
@@ -91,10 +79,7 @@ const edge = {
     id: 'RO:0012009',
     label: 'constitutively upstream of',
   },
-  contributesTo: {
-    "id": "RO:0002326",
-    "label": "contributes to",
-  },
+
   directlyProvidesInput: {
     id: 'RO:0002413',
     label: 'directly provides input for'
@@ -149,140 +134,6 @@ const edge = {
   },
 }
 
-const inverseEdge = {
-  enables: {
-    "id": "RO:0002327",
-    "label": "enables",
-  },
-  isActiveIn: {
-    id: 'RO:0002432',
-    label: 'is active in'
-  },
-  involvedIn: {
-    "id": "RO:0002331",
-    "label": "involved in",
-  },
-  locatedIn: {
-    id: 'RO:0001025',
-    label: 'located in'
-  },
-  contributesTo: {
-    "id": "RO:0002326",
-    "label": "contributes to",
-  },
-
-  actsUpstreamOf: {
-    "id": "RO:0002263",
-    "label": "acts upstream of",
-  },
-  actsUpstreamOfOrWithin: {
-    "id": "RO:0002264",
-    "label": "acts upstream of or within",
-  },
-
-  actsUpstreamOfOrWithinPositive: {
-    "id": "RO:0004032",
-    "label": "acts upstream of or within, positive effect",
-  },
-  actsUpstreamOfOrWithinNegative: {
-    "id": "RO:0004033",
-    "label": "acts upstream of or within, negative effect",
-  },
-  actsUpstreamOfPositive: {
-    "id": "RO:0004034",
-    "label": "acts upstream of, positive effect",
-  },
-  actsUpstreamOfNegative: {
-    "id": "RO:0004035",
-    "label": "acts upstream of, negative effect",
-  },
-};
-
-const rootNode = {
-  mf: {
-    'id': 'GO:0003674',
-    'label': 'molecular_function',
-    'aspect': 'F'
-  },
-  bp: {
-    'id': 'GO:0008150',
-    'label': 'biological_process',
-    'aspect': 'P'
-  },
-  cc: {
-    'id': 'GO:0005575',
-    'label': 'cellular_component',
-    'aspect': 'C'
-  },
-  complex: {
-    'id': 'GO:0032991',
-    'label': 'protein_containing_complex',
-    'aspect': 'PCC'
-  }
-}
-
-const simpleAnnotationEdgeConfig: SAConfigEdgeMap = {
-  [inverseEdge.enables.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    gpToTermReverse: true,
-    mfNodeRequired: false
-  },
-  [inverseEdge.involvedIn.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.partOf.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.isActiveIn.id]: {
-    gpToTermPredicate: edge.isActiveIn.id,
-    mfNodeRequired: false,
-    gpToTermReverse: false
-  },
-  [inverseEdge.actsUpstreamOf.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.causallyUpstreamOf.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.actsUpstreamOfOrWithin.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.causallyUpstreamOfOrWithin.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.actsUpstreamOfOrWithinPositive.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.causallyUpstreamOfOrWithinPositiveEffect.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.actsUpstreamOfOrWithinNegative.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.causallyUpstreamOfOrWithinNegativeEffect.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.actsUpstreamOfPositive.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.causallyUpstreamOfPositiveEffect.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.actsUpstreamOfNegative.id]: {
-    gpToTermPredicate: edge.enabledBy.id,
-    mfToTermPredicate: edge.causallyUpstreamOfNegativeEffect.id,
-    mfNodeRequired: true
-  },
-  [inverseEdge.contributesTo.id]: {
-    gpToTermPredicate: edge.contributesTo.id,
-    mfNodeRequired: false,
-    gpToTermReverse: false
-  },
-  [inverseEdge.locatedIn.id]: {
-    gpToTermPredicate: edge.locatedIn.id,
-    mfNodeRequired: false,
-    gpToTermReverse: false
-  },
-  [edge.partOf.id]: {
-    gpToTermPredicate: edge.partOf.id,
-    mfNodeRequired: false,
-    gpToTermReverse: false
-  }
-};
 
 
 export const noctuaFormConfig = {
@@ -292,45 +143,21 @@ export const noctuaFormConfig = {
         'id': 'gp',
         'label': 'Gene Product (default)'
       },
+      'mf': {
+        'id': 'mf',
+        'label': 'Molecular Function'
+      },
+      'bp': {
+        'id': 'bp',
+        'label': 'Biological Process'
+      },
+      'cc': {
+        'id': 'cc',
+        'label': 'Cellular Component'
+      },
       'date': {
         'id': 'date',
-        'label': 'Annotation Date'
-      }
-    }
-  },
-  annotationActivitySortField: {
-    options: {
-      [AnnotationActivitySortField.GP]: {
-        id: AnnotationActivitySortField.GP,
-        label: 'Gene Product (default)'
-      },
-      [AnnotationActivitySortField.GOTERM]: {
-        id: AnnotationActivitySortField.GOTERM,
-        label: 'GO Term'
-      },
-      [AnnotationActivitySortField.GP_TO_TERM_EDGE]: {
-        id: AnnotationActivitySortField.GP_TO_TERM_EDGE,
-        label: 'GP to Term Edge'
-      },
-      [AnnotationActivitySortField.GO_TERM_ASPECT]: {
-        id: AnnotationActivitySortField.GO_TERM_ASPECT,
-        label: 'GO Term Aspect'
-      },
-      [AnnotationActivitySortField.EVIDENCE_CODE]: {
-        id: AnnotationActivitySortField.EVIDENCE_CODE,
-        label: 'Evidence Code'
-      },
-      [AnnotationActivitySortField.REFERENCE]: {
-        id: AnnotationActivitySortField.REFERENCE,
-        label: 'Reference'
-      },
-      [AnnotationActivitySortField.WITH]: {
-        id: AnnotationActivitySortField.WITH,
-        label: 'With'
-      },
-      [AnnotationActivitySortField.DATE]: {
-        id: AnnotationActivitySortField.DATE,
-        label: 'Date'
+        'label': 'Activity Date'
       }
     }
   },
@@ -340,7 +167,7 @@ export const noctuaFormConfig = {
         'id': 'preview',
         'label': 'Preview'
       },
-      'simple': {
+      'activity': {
         'id': 'activity',
         'label': 'Simple view'
       },
@@ -348,6 +175,18 @@ export const noctuaFormConfig = {
         'id': 'detailed',
         'label': 'Default'
       },
+    }
+  },
+  'graphLayoutSpacing': {
+    'options': {
+      'compact': {
+        'id': 'compact',
+        'label': 'Compact View'
+      },
+      'expanded': {
+        'id': 'expanded',
+        'label': 'Expanded View'
+      }
     }
   },
   'activityType': {
@@ -478,7 +317,6 @@ export const noctuaFormConfig = {
     }
   },
   edge: edge,
-  inverseEdge: inverseEdge,
   allEdges: environment.globalKnownRelations,
   evidenceAutoPopulate: {
     nd: {
@@ -489,17 +327,23 @@ export const noctuaFormConfig = {
       reference: 'GO_REF:0000015'
     }
   },
-  rootNode: rootNode,
-
-
-  bpOnlyCausalEdges: [
-    Entity.createEntity(edge.causallyUpstreamOfNegativeEffect),
-    Entity.createEntity(edge.causallyUpstreamOf),
-    Entity.createEntity(edge.causallyUpstreamOfPositiveEffect),
-    Entity.createEntity(edge.causallyUpstreamOfOrWithinNegativeEffect),
-    Entity.createEntity(edge.causallyUpstreamOfOrWithinPositiveEffect),
-    Entity.createEntity(edge.causallyUpstreamOfOrWithin),
-  ],
+  rootNode: {
+    mf: {
+      'id': 'GO:0003674',
+      'label': 'molecular_function',
+      'aspect': 'F'
+    },
+    bp: {
+      'id': 'GO:0008150',
+      'label': 'biological_process',
+      'aspect': 'P'
+    },
+    cc: {
+      'id': 'GO:0005575',
+      'label': 'cellular_component',
+      'aspect': 'C'
+    }
+  },
 
 
 
@@ -537,34 +381,6 @@ export const noctuaFormConfig = {
     Entity.createEntity(edge.partOf),
     Entity.createEntity(edge.occursIn),
   ],
-
-  mfToTermEdges: [
-    edge.partOf.id,
-    edge.occursIn.id,
-    edge.causallyUpstreamOf.id,
-    edge.causallyUpstreamOfOrWithin.id,
-    edge.causallyUpstreamOfOrWithinPositiveEffect.id,
-    edge.causallyUpstreamOfOrWithinNegativeEffect.id,
-    edge.causallyUpstreamOfPositiveEffect.id,
-    edge.causallyUpstreamOfNegativeEffect.id,
-  ],
-
-  ccOnlyEdges: [
-    edge.locatedIn.id,
-    edge.isActiveIn.id,
-    edge.partOf.id,
-    edge.contributesTo.id,
-  ],
-
-  edgePriority: [
-    edge.enabledBy.id,
-    edge.partOf.id,
-    edge.occursIn.id,
-    edge.hasInput.id,
-    edge.hasOutput.id
-  ],
-
-  simpleAnnotationEdgeConfig: simpleAnnotationEdgeConfig
 
 };
 

@@ -56,9 +56,6 @@ export class ActivityFormComponent implements OnInit, OnDestroy {
     public noctuaActivityFormService: NoctuaActivityFormService
   ) {
     this._unsubscribeAll = new Subject();
-
-    // this.activity = self.noctuaActivityFormService.activity;
-    // this.activityFormPresentation = this.noctuaActivityFormService.activityPresentation;
   }
 
   ngOnInit(): void {
@@ -78,7 +75,7 @@ export class ActivityFormComponent implements OnInit, OnDestroy {
         if (this.activity.activityType === ActivityType.ccOnly) {
           this.descriptionSectionTitle = 'Localization Description';
         } else if (this.activity.activityType === ActivityType.molecule) {
-          this.annotatedSectionTitle = 'Small Molecule';
+          this.annotatedSectionTitle = 'Chemical';
           this.descriptionSectionTitle = 'Location (optional)';
         } else {
           this.descriptionSectionTitle = 'Function Description';
@@ -127,9 +124,6 @@ export class ActivityFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  preview() {
-    this.noctuaFormDialogService.openPreviewActivityDialog();
-  }
 
   clear() {
     this.noctuaActivityFormService.clearForm();

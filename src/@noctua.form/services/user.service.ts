@@ -63,10 +63,8 @@ export class NoctuaUserService {
             this.onUserChanged.next(this.user);
             // remove the token on the url
             const url = new URL(window.location.href);
-
             url.searchParams.delete('barista_token');
-            const newUrl = decodeURIComponent(url.href);
-            window.history.replaceState(null, null, newUrl);
+            window.history.replaceState(null, null, url.href);
           }
         });
     }
@@ -160,12 +158,10 @@ export class NoctuaUserService {
   }
 
   getGroupsFromAnnotations(annotations): Group[] {
-    const self = this;
-
     const groups = <Group[]>annotations.map((annotation) => {
       const url = annotation.value();
-      const group = self.getGroupDetails(annotation.value())
-      return group ? group : new Group(null, url);
+      const group = this.getGroupDetails(annotation.value())
+      return group ? group : new Group(url, null);
     });
 
     return groups
@@ -176,7 +172,7 @@ export class NoctuaUserService {
 
     const groups = <Group[]>urls.map((url) => {
       const group = self.getGroupDetails(url)
-      return group ? group : new Group(null, url);
+      return group ? group : new Group(url, null);
     });
 
     return groups

@@ -8,8 +8,6 @@ import { NoctuaEditorDropdownComponent } from './inline-editor/editor-dropdown/e
 import { NoctuaReferenceDropdownComponent } from './inline-reference/reference-dropdown/reference-dropdown.component';
 import { NoctuaWithDropdownComponent } from './inline-with/with-dropdown/with-dropdown.component';
 import { NoctuaDetailDropdownComponent } from './inline-detail/detail-dropdown/detail-dropdown.component';
-import { NoctuaEditorStandardDropdownComponent } from './inline-editor/standard-dropdown/standard-dropdown.component';
-import { NoctuaAutocompleteModule } from '@noctua.autocomplete/noctua-autocomplete.module';
 
 @NgModule({
     declarations: [
@@ -18,22 +16,19 @@ import { NoctuaAutocompleteModule } from '@noctua.autocomplete/noctua-autocomple
         NoctuaEditorDropdownComponent,
         NoctuaReferenceDropdownComponent,
         NoctuaWithDropdownComponent,
-        NoctuaEditorStandardDropdownComponent
     ],
     imports: [
         CommonModule,
         RouterModule,
         FormsModule,
         ReactiveFormsModule,
-        NoctuaSharedModule,
-        NoctuaAutocompleteModule,
+        NoctuaSharedModule
     ],
     exports: [
         NoctuaDetailDropdownComponent,
         NoctuaInlineEditorComponent,
         NoctuaReferenceDropdownComponent,
-        NoctuaWithDropdownComponent,
-        NoctuaEditorStandardDropdownComponent
+        NoctuaWithDropdownComponent
     ]
 })
 export class NoctuaEditorModule {

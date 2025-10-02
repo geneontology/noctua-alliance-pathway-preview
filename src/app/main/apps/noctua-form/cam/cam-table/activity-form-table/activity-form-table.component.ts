@@ -14,7 +14,7 @@ import {
   ActivityType,
   ActivityTreeNode,
   ActivityDisplayType,
-  BbopGraphService
+  NoctuaGraphService
 } from '@geneontology/noctua-form-base';
 
 import {
@@ -94,7 +94,7 @@ export class ActivityFormTableComponent implements OnInit, OnDestroy, OnChanges,
 
   constructor(
     public camService: CamService,
-    private _bbopGraphService: BbopGraphService,
+    private _noctuaGraphService: NoctuaGraphService,
     private noctuaCommonMenuService: NoctuaCommonMenuService,
     public noctuaUserService: NoctuaUserService,
     public noctuaFormConfigService: NoctuaFormConfigService,
@@ -115,13 +115,15 @@ export class ActivityFormTableComponent implements OnInit, OnDestroy, OnChanges,
   ngOnInit(): void {
     this.loadTree()
     this.gpOptions = cloneDeep(this.options);
-    this.gpOptions.showMenu = this.activity.activityType === ActivityType.molecule ||
-      this.activity.activityType === ActivityType.proteinComplex;
+    /*  this.gpOptions.showMenu = this.activity.activityType === ActivityType.molecule ||
+       this.activity.activityType === ActivityType.proteinComplex */
+
+    this.gpOptions.showMenu = true;
 
     if (this.activity.activityType === ActivityType.ccOnly) {
       this.descriptionSectionTitle = 'Localization Description';
     } else if (this.activity.activityType === ActivityType.molecule) {
-      this.annotatedSectionTitle = 'Small Molecule';
+      this.annotatedSectionTitle = 'Chemical';
       this.descriptionSectionTitle = 'Location (optional)';
     } else {
       this.descriptionSectionTitle = 'Function Description';
@@ -137,13 +139,15 @@ export class ActivityFormTableComponent implements OnInit, OnDestroy, OnChanges,
         this.gpSettings = cloneDeep(settings)
         this.gpSettings.showEvidence = false;
         this.gpSettings.showEvidenceSummary = false;
+        this.gpSettings.displayAddButton = true;
+        this.gpSettings.displayMenuButton = false;
       });
 
     if (this.options?.editableTerms) {
       this.editableTerms = this.options.editableTerms
     }
 
-    this._bbopGraphService.onCamGraphChanged
+    this._noctuaGraphService.onCamGraphChanged
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe((cam: Cam) => {
         if (!cam || cam.id !== this.cam.id) {
@@ -156,6 +160,7 @@ export class ActivityFormTableComponent implements OnInit, OnDestroy, OnChanges,
   }
 
   ngAfterViewInit(): void {
+
 
     this.gpTree?.treeModel.filterNodes((node) => {
       const activityNode = node.data.node as ActivityNode;
@@ -176,7 +181,7 @@ export class ActivityFormTableComponent implements OnInit, OnDestroy, OnChanges,
 
   loadTree() {
     if (!this.activity) return;
-    this.gpNode = this.activity.gpNode;
+    this.gpNode = this.activity.getGPNode();
     this.optionsDisplay = { ...this.options, hideHeader: true };
     this.treeNodes = this.activity.buildTrees();
     this.gpTreeNodes = this.activity.buildGPTrees();
@@ -221,7 +226,7 @@ export class ActivityFormTableComponent implements OnInit, OnDestroy, OnChanges,
       cam: this.cam,
       activity: this.activity,
       entity: entity,
-      category: EditorCategory.EVIDENCE_ALL,
+      category: EditorCategory.evidenceAll,
       evidenceIndex: entity.predicate.evidence.length - 1
     };
 

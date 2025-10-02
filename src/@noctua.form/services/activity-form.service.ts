@@ -7,7 +7,7 @@ import { Activity, ActivityState, ActivityType } from './../models/activity/acti
 import { ActivityNode } from './../models/activity/activity-node';
 import { ActivityForm } from './../models/forms/activity-form';
 import { ActivityFormMetadata } from './../models/forms/activity-form-metadata';
-import { BbopGraphService } from './bbop-graph.service';
+import { NoctuaGraphService } from './graph.service';
 import { CamService } from './cam.service';
 import { Entity } from '../models/activity/entity';
 import { Evidence } from '../models/activity/evidence';
@@ -33,7 +33,7 @@ export class NoctuaActivityFormService {
 
   constructor(private _fb: FormBuilder, public noctuaFormConfigService: NoctuaFormConfigService,
     private camService: CamService,
-    private bbopGraphService: BbopGraphService,
+    private noctuaGraphService: NoctuaGraphService,
     private noctuaLookupService: NoctuaLookupService) {
 
     this.camService.onCamChanged.subscribe((cam) => {
@@ -96,41 +96,8 @@ export class NoctuaActivityFormService {
     });
   }
 
-  getActivityFormErrors() {
-    let errors = [];
-
-    this.activityForm.getErrors(errors);
-
-    return errors;
-  }
-
   setActivityType(activityType: ActivityType) {
     this.activity = this.noctuaFormConfigService.createActivityModel(activityType);
-    this.initializeForm();
-  }
-
-  linkFormNode(entity, srcNode) {
-    entity.uuid = srcNode.uuid;
-    entity.term = srcNode.getTerm();
-  }
-
-  cloneForm(srcActivity, filterNodes) {
-    this.activity = this.noctuaFormConfigService.createActivityModel(
-      srcActivity.activityType
-    );
-
-    if (filterNodes) {
-      each(filterNodes, function (srcNode) {
-
-        let destNode = this.activity.getNode(srcNode.id);
-        if (destNode) {
-          destNode.copyValues(srcNode);
-        }
-      });
-    } else {
-      // this.activity.copyValues(srcActivity);
-    }
-
     this.initializeForm();
   }
 
@@ -143,14 +110,14 @@ export class NoctuaActivityFormService {
       const activities = self.createCCAnnotations(self.activity);
       each(activities, (activity: Activity) => {
         const saveData = activity.createSave();
-        promises.push(self.bbopGraphService.addActivity(self.cam, saveData.nodes, saveData.triples, saveData.title))
+        promises.push(self.noctuaGraphService.addActivity(self.cam, saveData.nodes, saveData.triples, saveData.title))
       })
 
       return forkJoin(promises)
 
     } else {
       const saveData = self.activity.createSave();
-      return forkJoin(self.bbopGraphService.addActivity(self.cam, saveData.nodes, saveData.triples, saveData.title));
+      return forkJoin(self.noctuaGraphService.addActivity(self.cam, saveData.nodes, saveData.triples, saveData.title));
     }
   }
 
