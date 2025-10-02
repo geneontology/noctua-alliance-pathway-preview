@@ -1,35 +1,35 @@
 <div class="dialog-content-wrapper noc-dialog" fxLayout="column" fxLayoutAlign="start stretch">
   <div class="m-0 noc-dialog-header" fxLayout="row" fxLayoutAlign="start center">
     <span class="noc-dialog-header-title">
-      Search Annotations</span>
+    Search Annotations</span>
     <span fxFlex></span>
     <button mat-stroked-button (click)="close()" class="noc-rounded-button noc-sm" aria-label="Close dialog">
-      Close
+      <mat-icon>close</mat-icon> Close
     </button>
   </div>
   <div fxLayout="row" fxLayoutAlign="start start" class="noc-dialog-body">
-    <div class="h-full noc-left-panel noc-form-section" fxFlex="200px" fxLayout="column" fxLayoutAlign="start stretch">
-      <div class="noc-section-header w-full" fxLayout="row" fxLayoutAlign="start center">
-        <div class="noc-section-heading w-full">
+    <div class="h-100-p noc-left-panel noc-form-section" fxFlex="200px" fxLayout="column" fxLayoutAlign="start stretch">
+      <div class="noc-section-header w-100-p" fxLayout="row" fxLayoutAlign="start center">
+        <div class="noc-section-heading w-100-p">
           Select Term
           <div class="text-truncate">
             <small>Please select below</small>
           </div>
         </div>
       </div>
-      <div class="noc-section-body w-full">
+      <div class="noc-section-body w-100-p" noctuaPerfectScrollbar>
         @for (activityNode of activityNodes; track activityNode) {
-        <div class="noc-term-box" (click)="selectActivityNode(activityNode)"
-          [ngClass]="{'noc-term-selected': activityNode.getTerm().id===selectedActivityNode?.getTerm().id}"
-          fxLayout="row" fxLayoutAlign="start center">
-          <mat-icon fkFlex="25px" class="green-300-fg mr-4">check_circle</mat-icon>
-          {{activityNode.getTerm().label}}
-        </div>
+          <div class="noc-term-box" (click)="selectActivityNode(activityNode)"
+            [ngClass]="{'noc-term-selected': activityNode.getTerm().id===selectedActivityNode?.getTerm().id}"
+            fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon fkFlex="25px" class="green-300-fg mr-4">check_circle</mat-icon>
+            {{activityNode.getTerm().label}}
+          </div>
         }
       </div>
     </div>
-    <div class="h-full noc-right-panel noc-form-section" fxFlex="100%" fxLayout="column" fxLayoutAlign="start stretch">
-      <div class="noc-section-header  w-full" fxLayout="row" fxLayoutAlign="start center">
+    <div class="h-100-p noc-right-panel noc-form-section" fxFlex="100%" fxLayout="column" fxLayoutAlign="start stretch">
+      <div class="noc-section-header  w-100-p" fxLayout="row" fxLayoutAlign="start center">
         <div class="noc-section-heading">
           Select Evidence <small>(optional)</small>
           <div class="text-truncate">
@@ -37,9 +37,9 @@
           </div>
         </div>
       </div>
-      <div class="noc-section-body w-full">
-        <mat-table class="noc-evidence-table w-full" #table [dataSource]="dataSource" matSort
-          [@animateStagger]="{value:'50'}">
+      <div class="noc-section-body w-100-p" noctuaPerfectScrollbar>
+        <mat-table class="noc-evidence-table w-100-p" #table [dataSource]="dataSource" matSort
+          [@animateStagger]="{value:'50'}" noctuaPerfectScrollbar>
           <ng-container matColumnDef="select" class="">
             <mat-header-cell *matHeaderCellDef fxFlex="30px">
               <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -59,12 +59,12 @@
               <p class="">
                 {{evidence.evidence?.label}} <br>
                 @for (evidenceExt of evidence.evidenceExts; track evidenceExt) {
-                <span>
-                  Ext: @for (relation of evidenceExt.relations; track relation) {
-                  <small>
+                  <span>
+                    Ext: @for (relation of evidenceExt.relations; track relation) {
+                    <small>
                     {{relation?.label}} : {{evidenceExt.term?.label}} </small>
-                  } <br>
-                </span>
+                    } <br>
+                  </span>
                 }
               </p>
             </mat-cell>
@@ -85,14 +85,14 @@
             <mat-header-cell *cdkHeaderCellDef fxFlex="">Assigned By</mat-header-cell>
             <mat-cell *cdkCellDef="let evidence" fxFlex="">
               @for (group of evidence.groups; track group; let i = $index; let isLast = $last) {
-              <span>
-                <p (click)="$event.stopPropagation()">
-                  {{group.name}}
-                </p>
-                @if (!isLast) {
-                <span>&#44;&nbsp;</span>
-                }
-              </span>
+                <span>
+                  <p (click)="$event.stopPropagation()">
+                    {{group.name}}
+                  </p>
+                  @if (!isLast) {
+                    <span>&#44;&nbsp;</span>
+                  }
+                </span>
               }
             </mat-cell>
           </ng-container>

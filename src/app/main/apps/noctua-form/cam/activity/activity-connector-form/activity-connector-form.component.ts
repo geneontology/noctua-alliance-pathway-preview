@@ -12,12 +12,12 @@ import {
   NoctuaActivityFormService,
   NoctuaFormConfigService,
   NoctuaUserService,
-  ConnectorType
+  ConnectorType,
+  FormType
 } from '@geneontology/noctua-form-base';
 import { NoctuaFormDialogService } from '../../../services/dialog.service';
 import { NoctuaConfirmDialogService } from '@noctua/components/confirm-dialog/confirm-dialog.service';
 import { takeUntil } from 'rxjs/operators';
-import { DataUtils } from '@noctua.form/data/config/data-utils';
 
 @Component({
   selector: 'noc-activity-connector',
@@ -41,12 +41,9 @@ export class ActivityConnectorFormComponent implements OnInit, OnDestroy {
   searchCriteria: any = {};
   evidenceFormArray: FormArray;
   relationshipOptions;
+  displayChemicalConnector: boolean = false;
 
   private _unsubscribeAll: Subject<any>;
-
-  allSelected: boolean = false;
-
-  items = []
 
   constructor(
     private confirmDialogService: NoctuaConfirmDialogService,
@@ -70,45 +67,25 @@ export class ActivityConnectorFormComponent implements OnInit, OnDestroy {
         this.connectorActivity = this.noctuaActivityConnectorService.connectorActivity;
         this.relationshipOptions = this.noctuaFormConfigService[this.connectorActivity.connectorType + 'Relationship']['options']
 
-        this.items = DataUtils.findCommonItems(
-          this.connectorActivity.subjectNode.chemicalParticipants,
-          this.connectorActivity.objectNode.chemicalParticipants)
       });
 
+    this.displayChemicalConnector = this.canConnectViaChemicals();
+
   }
 
-  updateAllSelected() {
-    this.allSelected = this.items.every(item => item.selected);
+  private canConnectViaChemicals(): boolean {
+
+    return this.connectorActivity.connectorType === ConnectorType.ACTIVITY_ACTIVITY &&
+      (this.connectorActivity.subjectNode.chemicalParticipants?.length > 0 ||
+        this.connectorActivity.objectNode.chemicalParticipants?.length > 0);
   }
 
-  selectAll() {
-    this.allSelected = !this.allSelected;
-    this.items.forEach(item => item.selected = this.allSelected);
-  }
+  openChemicalConnectorForm() {
+    if (this.closeDialog) {
+      this.closeDialog();
+    }
+    this.noctuaFormDialogService.openCreateActivityDialog(FormType.CHEMICAL_CONNECTOR);
 
-  getSelectedItems(): any[] {
-    return this.items.filter(item => item.selected);
-  }
-
-  onItemChange() {
-    this.updateAllSelected();
-  }
-
-  openActivityConnector(connector: Activity) {
-    this.noctuaActivityConnectorService.initializeForm(this.noctuaActivityConnectorService.objectActivity.id, connector.id);
-  }
-
-  saveParticipants() {
-    this.noctuaActivityConnectorService.saveChemicalParticipants(this.connectorActivity.subjectNode, this.connectorActivity.objectNode, this.getSelectedItems())
-      .subscribe(() => {
-        this.noctuaFormDialogService.openInfoToast('Chemical Reactions created.', 'OK');
-
-        this.noctuaActivityConnectorService.initializeForm(
-          this.noctuaActivityConnectorService.subjectActivity.id, this.noctuaActivityConnectorService.objectActivity.id)
-        if (this.closeDialog) {
-          this.closeDialog();
-        }
-      });
   }
 
   save() {

@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ElementRef, ViewChild, Input } from '@angular/core';
+import { Overlay, OverlayConfig, OriginConnectionPosition, OverlayConnectionPosition } from '@angular/cdk/overlay';
 
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 
-import { InlineEditorService } from './inline-editor.service';
+import { InlineEditorService, EditorDropdownDialogConfig } from './inline-editor.service';
 
 import {
     CamService,
@@ -11,10 +13,10 @@ import {
     ActivityNode,
     Activity,
     Cam,
-    Entity,
-    AnnotationActivity
+    NoctuaUserService
 } from '@geneontology/noctua-form-base';
-import { EditorCategory, EditorConfig, EditorType } from './../models/editor-category';
+import { EditorCategory } from './../models/editor-category';
+import { NoctuaConfirmDialogService } from '@noctua/components/confirm-dialog/confirm-dialog.service';
 
 @Component({
     selector: 'noctua-inline-editor',
@@ -27,13 +29,9 @@ export class NoctuaInlineEditorComponent implements OnInit, OnDestroy {
 
     @Input() cam: Cam;
     @Input() activity: Activity;
-    @Input() annotationActivity: AnnotationActivity;
-    @Input() autocompleteCategory;
     @Input() entity: ActivityNode;
     @Input() category: EditorCategory;
     @Input() evidenceIndex = 0;
-    @Input() relationshipChoices: Entity[] = [];
-    @Input() editorType: EditorType = EditorType.DEFAULT;
 
     @ViewChild('editorDropdownTrigger', { read: ElementRef })
     private editorDropdownTrigger: ElementRef;
@@ -41,6 +39,8 @@ export class NoctuaInlineEditorComponent implements OnInit, OnDestroy {
 
     constructor(private inlineEditorService: InlineEditorService,
         private camService: CamService,
+        private _noctuaUserService: NoctuaUserService,
+        private confirmDialogService: NoctuaConfirmDialogService,
         private noctuaActivityEntityService: NoctuaActivityEntityService) {
         this._unsubscribeAll = new Subject();
     }
@@ -51,28 +51,23 @@ export class NoctuaInlineEditorComponent implements OnInit, OnDestroy {
 
     openEditorDropdown(event) {
 
-        const displayEntity = cloneDeep(this.entity);
-        const data: EditorConfig = {
-            cam: this.cam,
-            activity: this.activity,
-            entity: displayEntity,
-            category: this.category,
-            evidenceIndex: this.evidenceIndex,
-            relationshipChoices: this.relationshipChoices,
-
-            //for Standard Editor
-            editorType: this.editorType,
-            annotationActivity: this.annotationActivity,
-            autocompleteCategory: this.autocompleteCategory
-        };
-
-        if (this.editorType === EditorType.DEFAULT) {
+        const success = () => {
+            const displayEntity = cloneDeep(this.entity);
+            const data = {
+                cam: this.cam,
+                activity: this.activity,
+                entity: displayEntity,
+                category: this.category,
+                evidenceIndex: this.evidenceIndex
+            };
             this.camService.onCamChanged.next(this.cam);
             this.camService.activity = this.activity;
             this.noctuaActivityEntityService.initializeForm(this.activity, displayEntity);
+            this.inlineEditorService.open(event.target, { data });
         }
 
-        this.inlineEditorService.open(event.target, { data });
+        this.camService.checkGroup(success)
+
     }
 
     ngOnDestroy(): void {

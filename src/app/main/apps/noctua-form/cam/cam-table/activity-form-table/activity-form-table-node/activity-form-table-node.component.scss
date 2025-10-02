@@ -58,8 +58,8 @@ $accent: map-get($theme, accent);
       @include deep-width(50px);
 
       .noc-action-button {
-        background-color: map-get($primary, 400);
-        color: #fff;
+        // background-color: map-get($primary, 400);
+        //color: #fff;
         @include mat.elevation(2);
       }
     }
@@ -134,11 +134,11 @@ $accent: map-get($theme, accent);
       }
 
       &.noc-relation-cell {
-        font-size: 12px;
+        font-size: 10px;
       }
 
       &.noc-extension-cell {
-        font-size: 12px;
+        font-size: 10px;
         .noc-extension {
           //border
         }

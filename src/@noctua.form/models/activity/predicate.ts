@@ -9,7 +9,6 @@ export class Predicate {
   isComplement = false;
   isReverseLink = false;
   reverseLinkTitle: string;
-  comments: string[] = []
   evidence: Evidence[];
   subjectId: string
   objectId: string

@@ -1,11 +1,10 @@
-
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, forkJoin } from 'rxjs';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { NoctuaFormConfigService } from './config/noctua-form-config.service';
 import { NoctuaLookupService } from './lookup.service';
 import { CamService } from './cam.service';
-import { BbopGraphService } from './bbop-graph.service';
+import { NoctuaGraphService } from './graph.service';
 import { ActivityConnectorForm } from './../models/forms/activity-connector-form';
 import { ActivityFormMetadata } from './../models/forms/activity-form-metadata';
 import { Activity } from './../models/activity/activity';
@@ -16,9 +15,7 @@ import { Entity } from '../models/activity/entity';
 import { noctuaFormConfig } from '../noctua-form-config';
 import { Triple } from '../models/activity/triple';
 import { cloneDeep } from 'lodash';
-import { Predicate } from '@noctua.form/models/activity/predicate';
-
-
+import { Predicate } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +41,7 @@ export class NoctuaActivityConnectorService {
   constructor(private _fb: FormBuilder, public noctuaFormConfigService: NoctuaFormConfigService,
     private camService: CamService,
     private noctuaLookupService: NoctuaLookupService,
-    private bbopGraphService: BbopGraphService) {
+    private noctuaGraphService: NoctuaGraphService) {
 
     this.onActivityChanged = new BehaviorSubject(null);
     this.onLinkChanged = new BehaviorSubject(null);
@@ -84,6 +81,9 @@ export class NoctuaActivityConnectorService {
 
     this.connectorForm = this.createConnectorForm();
     this.connectorFormGroup.next(this._fb.group(this.connectorForm));
+
+    this.connectorActivity.rule.displaySection.directness = false;
+    this.connectorActivity.rule.displaySection.effectDirection = false;
 
     if (this.connectorActivity.connectorType === ConnectorType.ACTIVITY_ACTIVITY) {
       this.connectorForm.relationship.setValue(this.connectorActivity.rule.relationship);
@@ -125,27 +125,23 @@ export class NoctuaActivityConnectorService {
       return nodes
     });
 
-    const triples = nodes.map((node) => {
-      const edge = new Entity(noctuaFormConfig.edge.hasInput.id, '')
+    const triples2 = nodes.map((node) => {
+      const edge = new Entity(noctuaFormConfig.edge.hasOutput.id, '')
       const predicate = new Predicate(edge);
       const triple = new Triple<ActivityNode>(
         subjectNode, node, predicate)
       return triple
     });
 
-    const triples2 = nodes.map((node) => {
-      const edge = new Entity(noctuaFormConfig.edge.hasOutput.id, '')
+    const triples = nodes.map((node) => {
+      const edge = new Entity(noctuaFormConfig.edge.hasInput.id, '')
       const predicate = new Predicate(edge);
       const triple = new Triple<ActivityNode>(
         objectNode, node, predicate)
       return triple
     });
 
-
-
-
-
-    return forkJoin(this.bbopGraphService.addActivity(this.cam, nodes, [...triples, ...triples2], this.cam.title));
+    return forkJoin(this.noctuaGraphService.addActivity(this.cam, nodes, [...triples, ...triples2], this.cam.title));
 
   }
 
@@ -154,7 +150,7 @@ export class NoctuaActivityConnectorService {
 
     if (self.connectorActivity.state === ConnectorState.editing) {
       const saveData = self.connectorActivity.createEdit(self.currentConnectorActivity);
-      return self.bbopGraphService.editConnection(
+      return self.noctuaGraphService.editConnection(
         self.cam,
         saveData.removeTriples,
         saveData.addTriples).then(() => {
@@ -162,7 +158,7 @@ export class NoctuaActivityConnectorService {
         });
     } else { // creation
       const saveData = self.connectorActivity.createSave();
-      return self.bbopGraphService.addActivity(self.cam, [], saveData.triples, '', CamOperation.ADD_CAUSAL_RELATION);
+      return self.noctuaGraphService.addActivity(self.cam, [], saveData.triples, '', CamOperation.ADD_CAUSAL_RELATION);
     }
   }
 
@@ -170,7 +166,7 @@ export class NoctuaActivityConnectorService {
     const self = this;
     const deleteData = connectorActivity.createDelete();
 
-    return self.bbopGraphService.deleteActivity(self.cam, [], deleteData.triples);
+    return self.noctuaGraphService.deleteActivity(self.cam, [], deleteData.triples);
   }
 
 

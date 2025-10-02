@@ -17,7 +17,6 @@ import { CamToolbarOptions } from '@noctua.common/models/cam-toolbar-options';
   selector: 'noc-cam-toolbar',
   templateUrl: './cam-toolbar.component.html',
   styleUrls: ['./cam-toolbar.component.scss'],
-  // encapsulation: ViewEncapsulation.None,
 })
 export class CamToolbarComponent implements OnInit, OnDestroy {
 
@@ -42,27 +41,11 @@ export class CamToolbarComponent implements OnInit, OnDestroy {
     this._unsubscribeAll = new Subject();
   }
 
-  ngOnInit(): void { }
-
-  openGraph() {
-    this.noctuaCommonMenuService.closeLeftDrawer();
-    this.noctuaCommonMenuService.closeRightDrawer();
-    this.noctuaCommonMenuService.selectMiddlePanel(MiddlePanel.CAM_GRAPH)
-  }
-
-  openTable() {
-    //this.noctuaCommonMenuService.closeLeftDrawer();
-    this.noctuaCommonMenuService.closeRightDrawer();
-    this.noctuaCommonMenuService.selectMiddlePanel(MiddlePanel.CAM_TABLE)
-  }
-
-  openPreview() {
-    this.noctuaCommonMenuService.selectMiddlePanel(MiddlePanel.CAM_PREVIEW)
+  ngOnInit(): void {
   }
 
   openLeftDrawer(panel) {
     this.noctuaCommonMenuService.selectLeftPanel(panel);
-    // this.noctuaCommonMenuService.openLeftDrawer();
   }
 
   selectMiddlePanel(panel: MiddlePanel) {
@@ -83,35 +66,17 @@ export class CamToolbarComponent implements OnInit, OnDestroy {
     this.noctuaCommonMenuService.createModel(type);
   }
 
-  openSettings() {
-    this.openRightDrawer(RightPanel.GRAPH_SETTINGS)
-  }
-
   openCamForm() {
     this.camService.initializeForm(this.cam);
-    this.noctuaCommonMenuService.selectLeftPanel(LeftPanel.camForm);
-    this.noctuaCommonMenuService.closeRightDrawer();
-    this.noctuaCommonMenuService.openLeftDrawer();
-  }
-
-  openActivityForm(activityType: ActivityType) {
-    this.noctuaActivityFormService.setActivityType(activityType);
-    this.noctuaCommonMenuService.selectLeftPanel(LeftPanel.activityForm);
+    this.noctuaCommonMenuService.selectLeftPanel(LeftPanel.CAM_FORM);
     this.noctuaCommonMenuService.closeRightDrawer();
     this.noctuaCommonMenuService.openLeftDrawer();
   }
 
   openCopyModel() {
-    this.noctuaCommonMenuService.selectLeftPanel(LeftPanel.copyModel);
+    this.noctuaCommonMenuService.selectLeftPanel(LeftPanel.COPY_MODEL);
     this.noctuaCommonMenuService.closeRightDrawer();
     this.noctuaCommonMenuService.openLeftDrawer();
-  }
-
-  undoModel() {
-    this.camService.undoModel(this.cam);
-  }
-  redoModel() {
-    this.camService.redoModel(this.cam);
   }
 
   ngOnDestroy(): void {

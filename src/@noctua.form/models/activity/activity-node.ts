@@ -10,8 +10,6 @@ import { Predicate } from './predicate';
 import { PendingChange } from './pending-change';
 import { CamStats } from './cam';
 
-import * as EntityDefinition from './../../data/config/entity-definition';
-
 export class GoCategory {
   id: ActivityNodeType;
   category: string;
@@ -70,7 +68,6 @@ export interface ActivityNodeDisplay {
 }
 
 export class ActivityNode implements ActivityNodeDisplay {
-
   subjectId: string;
   entityType = EntityType.ACTIVITY_NODE
   type: ActivityNodeType;
@@ -87,8 +84,10 @@ export class ActivityNode implements ActivityNodeDisplay {
   activity: Activity;
   ontologyClass: any = [];
   isComplement = false;
+  closures: any = [];
   assignedBy: boolean = null;
   contributor: Contributor = null;
+  isCatalyticActivity = false;
   isKey = false;
   displaySection: any;
   displayGroup: any;
@@ -108,6 +107,7 @@ export class ActivityNode implements ActivityNodeDisplay {
   showInMenu = false;
   insertMenuNodes = [];
   linkedNode = false;
+  familyNodes = [];
   displayId: string;
   expandable: boolean = true;
   expanded: boolean = false;
@@ -121,6 +121,7 @@ export class ActivityNode implements ActivityNodeDisplay {
   pendingEntityChanges: PendingChange;
   pendingRelationChanges: PendingChange;
 
+  //CHemical Properties  
   chemicalParticipants = []
 
 
@@ -149,20 +150,6 @@ export class ActivityNode implements ActivityNodeDisplay {
 
   set classExpression(classExpression) {
     this.term.classExpression = classExpression;
-  }
-
-  updateNodeType() {
-    if (this.hasRootType(EntityDefinition.GoBiologicalProcess)) {
-      this.type = ActivityNodeType.GoBiologicalProcess
-    } else if (this.hasRootType(EntityDefinition.GoMolecularEntity)) {
-      this.type = ActivityNodeType.GoMolecularEntity
-    } else if (this.hasRootType(EntityDefinition.GoMolecularFunction)) {
-      this.type = ActivityNodeType.GoMolecularFunction
-    } else if (this.hasRootType(EntityDefinition.GoBiologicalProcess)) {
-      this.type = ActivityNodeType.GoBiologicalProcess
-    } else if (this.hasRootType(EntityDefinition.GoCellularComponent)) {
-      this.type = ActivityNodeType.GoCellularComponent
-    }
   }
 
   setTermOntologyClass(value) {
@@ -195,7 +182,6 @@ export class ActivityNode implements ActivityNodeDisplay {
 
   hasRootTypes(inRootTypes: GoCategory[]) {
     let found = false;
-
     for (let i = 0; i < this.rootTypes.length; i++) {
       for (let j = 0; j < inRootTypes.length; j++) {
         if (this.rootTypes[i].id === inRootTypes[j].category) {
@@ -209,16 +195,19 @@ export class ActivityNode implements ActivityNodeDisplay {
   }
 
   clearValues() {
-    this.term.id = null;
-    this.term.label = null;
-    this.predicate.resetEvidence();
+    const self = this;
+    self.term.id = null;
+    self.term.label = null;
+    self.predicate.resetEvidence();
   }
 
   copyValues(node: ActivityNode) {
-    this.uuid = node.uuid;
-    this.term = node.term;
-    this.assignedBy = node.assignedBy;
-    this.isComplement = node.isComplement;
+    const self = this;
+    self.uuid = node.uuid;
+    self.term = node.term;
+    self.assignedBy = node.assignedBy;
+    self.isComplement = node.isComplement;
+    self.isCatalyticActivity = node.isCatalyticActivity;
   }
 
   setTermLookup(value) {
@@ -233,9 +222,10 @@ export class ActivityNode implements ActivityNodeDisplay {
   }
 
   enableRow() {
+    const self = this;
     let result = true;
-    if (this.nodeGroup) {
-      if (this.nodeGroup.isComplement && this.treeLevel > 0) {
+    if (self.nodeGroup) {
+      if (self.nodeGroup.isComplement && self.treeLevel > 0) {
         result = false;
       }
     }
@@ -248,7 +238,7 @@ export class ActivityNode implements ActivityNodeDisplay {
     let modified = false;
 
     if (self.term.modified) {
-      if (self.type === ActivityNodeType.GoMolecularEntity) {
+      if (self.id === ActivityNodeType.GoMolecularEntity) {
         modifiedStats.gpsCount++;
         stat.gpsCount++;
       } else {
