@@ -87,7 +87,7 @@ export class NoctuaPathwayComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngAfterViewInit() {
     if (this.goGocamViewer?.nativeElement) {
-      const vizElement = this.goGocamViewer.nativeElement;
+      const gocamViewerElement = this.goGocamViewer.nativeElement;
       // Call setModelData when your model data is ready
       this._bbopGraphService.onCamGraphChanged
         .pipe(takeUntil(this._unsubscribeAll))
@@ -95,7 +95,7 @@ export class NoctuaPathwayComponent implements OnInit, AfterViewInit, OnDestroy 
           if (!cam || cam.id !== this.cam.id) return;
           this.cam = cam;
 
-          vizElement.setModelData(cam.response?._data);
+          gocamViewerElement.setModelData(cam.response?._data);
         });
     }
   }
