@@ -8,7 +8,7 @@ if (environment.production) {
   enableProdMode();
 }
 
-import { defineCustomElements } from '@geneontology/wc-gocam-viz/loader';
+import { defineCustomElements } from "@geneontology/web-components/loader";
 defineCustomElements();
 
 if (environment.production) {

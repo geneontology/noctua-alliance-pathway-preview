@@ -33,7 +33,7 @@ export class NoctuaPathwayComponent implements OnInit, AfterViewInit, OnDestroy 
   MiddlePanel = MiddlePanel;
   RightPanel = RightPanel;
 
-  @ViewChild('gocamViz') gocamViz: ElementRef;
+  @ViewChild('goGocamViewer') goGocamViewer: ElementRef;
 
   @ViewChild('leftDrawer', { static: true })
   leftDrawer: MatDrawer;
@@ -86,8 +86,8 @@ export class NoctuaPathwayComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit() {
-    if (this.gocamViz?.nativeElement) {
-      const vizElement = this.gocamViz.nativeElement;
+    if (this.goGocamViewer?.nativeElement) {
+      const vizElement = this.goGocamViewer.nativeElement;
       // Call setModelData when your model data is ready
       this._bbopGraphService.onCamGraphChanged
         .pipe(takeUntil(this._unsubscribeAll))
