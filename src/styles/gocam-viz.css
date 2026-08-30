@@ -1,0 +1,67 @@
+/* Theming for the <wc-gocam-viz> Stencil element.
+   The component renders into a shadow root, so Tailwind utilities can't reach
+   inside it — everything below crosses the boundary via custom properties and
+   ::part(). Ported from the Angular app's
+   src/app/main/apps/noctua-pathway/noctua-pathway.component.scss */
+
+wc-gocam-viz {
+  display: block;
+  width: 100%;
+  background-color: #fff;
+
+  /* The component sizes its graph off --graph-height (default 800px) and stacks
+     a header, the activities panel and the legend around it. It does NOT read
+     the host's height, so `height: 100%` here would do nothing except let ~950px
+     of content spill out of a shorter box and push the page into scrolling.
+     Size the graph to the viewport instead and let the one scroll container in
+     PathwayViewer absorb whatever is left (mainly the legend).
+
+     Subtracted chrome: toolbar 50 + model bar 40 + content padding 32 +
+     the component's own panel header ~48 + legend ~120. */
+  --graph-height: max(420px, calc(100vh - 330px));
+
+  --panel-border-width: 1px;
+  --panel-header-background: rgba(0, 0, 0, 0.03);
+  --panel-header-padding: 0.5rem 1rem;
+  --panel-header-font-weight: normal;
+
+  --button-background: #0d6efd;
+  --button-color: white;
+  --button-background-hover: #0b5ed7;
+
+  --legend-border-width: 1px 0 0 0;
+  --legend-padding: 0.5rem 1rem;
+
+  --process-label-background: #7a548d;
+  --process-label-color: white;
+  --process-label-padding: 0.5rem 1rem;
+  --process-label-border-width: 0;
+
+  --activity-border-color: #d1b6df;
+  --activity-border-width: 0 0 3px 0;
+  --activity-background-active: #af732a;
+  --activity-color-active: #eee;
+
+  --gene-product-color: #333;
+  --gene-product-padding: 0.5rem 1rem;
+  --gene-product-border-width: 0 0 1px 0;
+
+  --function-label-padding: 0.5rem 1rem;
+  --function-nodes-padding: 0px 1rem 0.5rem 1rem;
+
+  --node-border-width: 0 0 1px 0;
+  --graph-padding: 1rem;
+}
+
+wc-gocam-viz::part(gene-product) {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+wc-gocam-viz::part(legend-header) {
+  text-align: center;
+}
+
+wc-gocam-viz::part(gocam-title) {
+  font-weight: bold;
+}
