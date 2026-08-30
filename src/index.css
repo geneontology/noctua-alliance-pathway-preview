@@ -28,6 +28,27 @@
   --color-accent-800: #dc9209;
   --color-accent-900: #ab7207;
 
+  /* Exact colors carried over from the Angular app so the port matches it.
+     Sources: src/@noctua/scss/noctua.scss ($noc-primary-color, noc-chip-color),
+     the toolbar component SCSS (.noc-dev, .noc-beta, .noc-login-button) and
+     the pathway component SCSS (.noc-not-loggedin, chip colors). */
+  --color-noc-border: #3b5998;
+  --color-noc-canvas: #e2e2e2;
+  --color-noc-dev: #fad38a;
+  --color-noc-beta: #fdcbbc;
+  --color-noc-login: #52a16c;
+  --color-noc-warn: #e5c2c2;
+  --color-noc-logo: #555555;
+  --color-noc-muted: #888888;
+  --color-noc-chip-icon: #777777;
+  --color-noc-chip-user: #bbc9cc;
+  --color-noc-chip-user-icon: #59939e;
+  --color-noc-chip-date: #aee9f5;
+  --color-noc-chip-development: #f4c89c;
+  --color-noc-chip-production: #b6f1cc;
+  --color-noc-chip-review: #d8f6a3;
+  --color-noc-chip-default: #dddddd;
+
   --text-2xs: 0.625rem;
   --text-2xs--line-height: 0.875rem;
   --text-3xs: 0.5rem;

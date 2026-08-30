@@ -3,28 +3,29 @@ interface StateColor {
   circle: string
 }
 
+/**
+ * The Angular `noc-chip-color($color)` mixin: a 1px border in the color, the
+ * color at 20% opacity as the background, and the icon circle filled solid.
+ * Colors are the ones from the pathway component SCSS.
+ */
 const STATE_COLORS: Record<string, StateColor> = {
   development: {
-    chip: 'bg-orange-100 text-amber-900 border-orange-300',
-    circle: 'bg-orange-200 border-orange-300 text-amber-700',
+    chip: 'border-noc-chip-development bg-noc-chip-development/20',
+    circle: 'bg-noc-chip-development text-noc-chip-icon',
   },
   production: {
-    chip: 'bg-green-500/10 text-green-900 border-green-300',
-    circle: 'bg-green-200 border-green-300 text-green-700',
+    chip: 'border-noc-chip-production bg-noc-chip-production/20',
+    circle: 'bg-noc-chip-production text-noc-chip-icon',
   },
   review: {
-    chip: 'bg-lime-100 text-yellow-900 border-lime-300',
-    circle: 'bg-lime-200 border-lime-300 text-yellow-700',
-  },
-  delete: {
-    chip: 'bg-red-100 text-red-800 border-red-300',
-    circle: 'bg-red-200 border-red-300 text-red-600',
+    chip: 'border-noc-chip-review bg-noc-chip-review/20',
+    circle: 'bg-noc-chip-review text-noc-chip-icon',
   },
 }
 
 const DEFAULT_STATE_COLOR: StateColor = {
-  chip: 'bg-gray-100 text-gray-800 border-gray-300',
-  circle: 'bg-gray-200 border-gray-300 text-gray-600',
+  chip: 'border-noc-chip-default bg-noc-chip-default/20',
+  circle: 'bg-noc-chip-default text-noc-chip-icon',
 }
 
 export function getStateColor(stateName?: string): StateColor {

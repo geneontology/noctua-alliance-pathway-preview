@@ -20,8 +20,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // overflow-hidden so nothing here can ever push the document into scrolling —
   // the single scroll container lives inside PathwayViewer.
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-gray-300">
-      <div className="h-12 shrink-0 border-b-2 border-b-primary-500">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-noc-canvas">
+      <div className="h-[50px] shrink-0 border-b-2 border-b-noc-border">
         <Toolbar />
       </div>
       <div className="min-h-0 flex-1">{children}</div>

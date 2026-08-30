@@ -1,6 +1,5 @@
 import type React from 'react'
 import { useMemo } from 'react'
-import { FaExclamationTriangle } from 'react-icons/fa'
 import { useAppSelector } from './hooks'
 import { selectAuthUser, selectBaristaToken } from '@/features/auth/slices/authSlice'
 import { useGetModelQuery } from '@/features/gocam/slices/camApiSlice'
@@ -28,10 +27,8 @@ const PathwayViewer: React.FC = () => {
   return (
     <div className="flex h-full min-h-0 flex-col">
       {!isLoggedIn && (
-        <div className="flex shrink-0 items-center justify-center gap-2 border-b-2 border-amber-400 bg-amber-100 px-4 py-2 text-sm text-amber-900">
-          <FaExclamationTriangle className="shrink-0 text-amber-500" size={16} />
-          <span className="font-bold">Not Logged In:</span>
-          You can only view existing annotations
+        <div className="mb-1 flex h-10 w-full shrink-0 items-center justify-center bg-noc-warn px-[10px] text-xs">
+          Not Logged In: You can only view existing annotations
         </div>
       )}
 

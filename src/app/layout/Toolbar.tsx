@@ -18,9 +18,8 @@ const Toolbar: React.FC = () => {
 
   const { isDev, isBeta, isProd } = ENVIRONMENT
 
-  // `brown`/`mauve` in the VPE original aren't defined in the theme — they
-  // silently produced no background at all. Use real palette colors.
-  const toolbarBg = isDev ? 'bg-amber-100' : isBeta ? 'bg-accent-500' : 'bg-white'
+  // Exact backgrounds from the Angular toolbar SCSS: .noc-dev / .noc-beta.
+  const toolbarBg = isDev ? 'bg-noc-dev' : isBeta ? 'bg-noc-beta' : 'bg-white'
   const envLabel = isDev ? '(dev)' : isBeta ? '(beta)' : null
 
   const logout = () => {
@@ -28,12 +27,12 @@ const Toolbar: React.FC = () => {
   }
 
   return (
-    <div className={`relative flex h-full items-center px-4 py-0 ${toolbarBg}`}>
+    <div className={`relative flex h-full items-center py-0 pr-[10px] pl-[5px] ${toolbarBg}`}>
       {/* Logo / Branding — left side */}
       <div className="flex h-full flex-col items-start justify-center py-2">
         <div className="flex flex-row items-center">
           <a
-            className="mr-2 text-xl font-bold no-underline hover:text-black"
+            className="mr-1 text-xl font-bold text-noc-logo no-underline hover:text-black"
             href={noctuaUrl}
             target="_blank"
             rel="noreferrer"
@@ -41,7 +40,7 @@ const Toolbar: React.FC = () => {
             Noctua
           </a>
           <a
-            className="mr-1 text-xl text-gray-900 no-underline hover:text-black"
+            className="mr-1 text-xl text-noc-logo no-underline hover:text-black"
             href="/"
             onClick={e => {
               e.preventDefault()
@@ -50,10 +49,10 @@ const Toolbar: React.FC = () => {
           >
             Pathway Viewer
           </a>
-          {envLabel && <span className="text-xl text-gray-700">{envLabel}</span>}
+          {envLabel && <span className="text-xl text-noc-logo">{envLabel}</span>}
         </div>
         {!isProd && (
-          <div className="text-2xs font-bold text-gray-700 italic">
+          <div className="text-2xs italic">
             Testing Version. Visit{' '}
             <a
               className="underline hover:text-black"
@@ -116,7 +115,7 @@ const Toolbar: React.FC = () => {
                 <div className="flex flex-row items-center">
                   <div className="mr-1.5 flex max-w-[150px] flex-col items-start overflow-hidden leading-5">
                     <div className="truncate">{user.name}</div>
-                    <div className="truncate text-2xs text-gray-500">{user.group?.label}</div>
+                    <div className="truncate text-2xs text-noc-muted">{user.group?.label}</div>
                   </div>
                   <IoChevronDown />
                 </div>
@@ -137,7 +136,7 @@ const Toolbar: React.FC = () => {
               <Button
                 component="a"
                 href={loginUrl}
-                className="!bg-green-600 !text-white hover:!bg-green-700"
+                className="!bg-noc-login !text-white hover:!brightness-95"
                 data-pw="noc-login-button"
               >
                 Login

@@ -7,8 +7,8 @@ import type { Contributor } from '@/features/users/models/contributor'
 
 const MAX_VISIBLE = 2
 
-const SLATE_CHIP = 'border-slate-300 bg-slate-100 text-slate-800'
-const SLATE_CIRCLE = 'border-slate-300 bg-slate-200 text-slate-600'
+const USER_CHIP = 'border-noc-chip-user bg-noc-chip-user/20'
+const USER_CIRCLE = 'bg-noc-chip-user text-noc-chip-user-icon'
 
 interface ContributorChipsProps {
   contributors: Contributor[]
@@ -30,9 +30,9 @@ const ContributorChips: React.FC<ContributorChipsProps> = ({ contributors }) => 
           <Chip
             key={contributor.uri}
             icon={<FaUser size={11} />}
-            chipClass={SLATE_CHIP}
-            circleClass={SLATE_CIRCLE}
-            className="max-w-[180px]"
+            chipClass={USER_CHIP}
+            circleClass={USER_CIRCLE}
+            className="max-w-[200px]"
           >
             {contributor.name}
           </Chip>
@@ -41,7 +41,7 @@ const ContributorChips: React.FC<ContributorChipsProps> = ({ contributors }) => 
         {hidden.length > 0 && (
           <>
             <button
-              className={`flex h-[26px] cursor-pointer items-center rounded-full border px-3 text-[11px] transition-shadow hover:shadow-sm hover:brightness-95 ${SLATE_CHIP}`}
+              className={`flex h-[25px] cursor-pointer items-center rounded-full border px-3 text-2xs transition-shadow hover:shadow-sm hover:brightness-95 ${USER_CHIP}`}
               onClick={e => overflowMenu.open(e.currentTarget)}
             >
               +{hidden.length} more
@@ -54,7 +54,7 @@ const ContributorChips: React.FC<ContributorChipsProps> = ({ contributors }) => 
               {hidden.map(contributor => (
                 <MenuItem key={contributor.uri} onClick={overflowMenu.close}>
                   <div className="flex items-center gap-2">
-                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600">
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-noc-chip-user text-noc-chip-user-icon">
                       <FaUser size={11} />
                     </div>
                     <span>{contributor.name}</span>
