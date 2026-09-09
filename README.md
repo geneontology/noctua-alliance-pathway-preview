@@ -5,7 +5,7 @@ A Noctua workbench that renders a GO-CAM model in the Alliance pathway style.
 ## Stack
 
 React 19 + TypeScript, Vite, Mantine, Tailwind CSS, Redux Toolkit / RTK Query,
-`@geneontology/wc-gocam-viz` for the pathway rendering.
+`@geneontology/web-components` (`<go-gocam-viewer>`) for the pathway rendering.
 
 ## Development server
 

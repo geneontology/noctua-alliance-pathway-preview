@@ -2,7 +2,7 @@ import type React from 'react'
 import { useEffect, useRef } from 'react'
 import type { MinervaModelData } from '../models/model'
 
-const TAG = 'wc-gocam-viz'
+const TAG = 'go-gocam-viewer'
 
 type GoCamVizElement = HTMLElement & {
   setModelData: (model: unknown) => Promise<void>
@@ -15,7 +15,7 @@ interface GoCamVizProps {
 }
 
 /**
- * Thin wrapper around the `<wc-gocam-viz>` Stencil element.
+ * Thin wrapper around the `<go-gocam-viewer>` Stencil element.
  *
  * `gocamId` / `apiUrl` are deliberately left unset: setting `gocamId` makes the
  * component fetch from the public GO API on its own, which would bypass Barista
@@ -47,7 +47,7 @@ const GoCamViz: React.FC<GoCamVizProps> = ({ raw }) => {
     }
   }, [raw])
 
-  return <wc-gocam-viz ref={ref} />
+  return <go-gocam-viewer ref={ref} />
 }
 
 export default GoCamViz

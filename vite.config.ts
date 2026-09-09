@@ -16,10 +16,7 @@ export default defineConfig(({ mode }) => {
     apply: 'build' as const,
     transformIndexHtml(html: string) {
       if (env.VITE_BASE_URL && env.VITE_BASE_URL !== '/') {
-        return html.replace(
-          /<head>/i,
-          `<head>\n  <base href="${env.VITE_BASE_URL}">`
-        )
+        return html.replace(/<head>/i, `<head>\n  <base href="${env.VITE_BASE_URL}">`)
       }
       return html
     },
@@ -68,18 +65,19 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (id.includes('@mantine')) return 'mantine'
             if (id.includes('@reduxjs') || id.includes('react-redux')) return 'redux'
-            // wc-gocam-viz is a Stencil bundle that drags in cytoscape + dagre +
-            // bbop-graph-noctua. It dwarfs the app code, so it gets its own chunk.
-            if (id.includes('wc-gocam-viz')) return 'gocam-viz'
+            // @geneontology/web-components is a Stencil bundle that drags in
+            // cytoscape + dagre + bbop-graph-noctua. It dwarfs the app code, so
+            // it gets its own chunk.
+            if (id.includes('@geneontology/web-components')) return 'gocam-viewer'
             if (id.includes('cytoscape') || id.includes('dagre') || id.includes('graphlib'))
-              return 'gocam-viz'
+              return 'gocam-viewer'
           },
-          assetFileNames: (assetInfo) => {
-            let extType = assetInfo.name.split('.').at(1);
+          assetFileNames: assetInfo => {
+            let extType = assetInfo.name.split('.').at(1)
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
-              extType = 'img';
+              extType = 'img'
             }
-            return `assets/${extType}/[name]-[hash][extname]`;
+            return `assets/${extType}/[name]-[hash][extname]`
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
@@ -94,10 +92,10 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 4202,
-      open: true
+      open: true,
     },
     preview: {
-      port: 4202
+      port: 4202,
     },
     test: {
       globals: true,

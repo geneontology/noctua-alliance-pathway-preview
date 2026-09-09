@@ -21,7 +21,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@geneontology/wc-gocam-viz": "1.1.2",
+    "@geneontology/web-components": "^1.0.1",
     "@mantine/core": "^9.1.1",
     "@mantine/hooks": "^9.1.1",
     "@reduxjs/toolkit": "^2.6.1",

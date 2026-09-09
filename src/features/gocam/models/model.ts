@@ -20,7 +20,7 @@ export interface ModelAnnotation {
 
 /**
  * The raw `data` object from an m3Batch response: `id`, `individuals`, `facts`,
- * `annotations`, `modified-p`. Passed to `wc-gocam-viz.setModelData()` untouched —
+ * `annotations`, `modified-p`. Passed to `go-gocam-viewer.setModelData()` untouched —
  * the web component runs its own bbop-graph parse over it.
  */
 export interface MinervaModelData {

@@ -1,14 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { defineCustomElements } from '@geneontology/wc-gocam-viz/loader'
+import { defineCustomElements } from '@geneontology/web-components/loader'
 import App from './App'
 import { store } from './app/store/store'
 import '@mantine/core/styles.css'
 import './index.css'
-import './styles/gocam-viz.css'
+import './styles/go-gocam-viewer.css'
 
-// Registers <wc-gocam-viz> before the first render, same as the Angular app's
+// Registers <go-gocam-viewer> before the first render, same as the Angular app's
 // src/main.ts. The element is lazily hydrated; GoCamViz waits on whenDefined().
 defineCustomElements()
 

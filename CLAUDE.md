@@ -14,11 +14,12 @@ The app does four things and nothing else:
 1. read `model_id` and `barista_token` from the query string,
 2. resolve the logged-in user from the Barista token,
 3. fetch the model from Minerva via a single `m3Batch` `get`/`model` request,
-4. hand the **raw** response payload to the `<wc-gocam-viz>` web component.
+4. hand the **raw** response payload to the `<go-gocam-viewer>` web component.
 
 All rendering, layout and interaction inside the diagram belongs to
-[`@geneontology/wc-gocam-viz`](https://github.com/geneontology/wc-gocam-viz) (source checkout
-at `../wc-gocam-viz`). This repo is the shell around it. **It never writes to Minerva.**
+[`@geneontology/web-components`](https://github.com/geneontology/web-components) (source
+checkout at `../web-components`). This repo is the shell around it. **It never writes to
+Minerva.**
 
 Not to be confused with the sibling app `../noctua-visual-pathway-editor` ("VPE"), a full
 editor that shares this repo's conventions and supplied most of its boilerplate.
@@ -65,7 +66,7 @@ inline it.
 
 ### The one thing to get right
 
-`wc-gocam-viz.setModelData()` takes the **untransformed** `data` object from the m3Batch
+`go-gocam-viewer.setModelData()` takes the **untransformed** `data` object from the m3Batch
 response — the one with `id`, `individuals`, `facts`, `annotations`. It runs its own
 `bbop-graph-noctua` parse internally. Do not reshape it, and do not port VPE's
 `transformGraphData()`; `camApiSlice` returns `{ raw, meta }` so the raw payload reaches the
@@ -93,9 +94,9 @@ yourself adding one, check whether the feature belongs in VPE instead.
 
 ### Build / bundling
 
-`vite.config.ts` splits `mantine`, `redux`, and `gocam-viz` (the Stencil bundle plus its
-cytoscape/dagre dependencies) into named chunks; the gocam-viz chunk is ~850 kB and dominates
-the build. `rollup-plugin-visualizer` writes `stats-*.html` into the output dir.
+`vite.config.ts` splits `mantine`, `redux`, and `gocam-viewer` (the Stencil bundle plus its
+cytoscape/dagre dependencies) into named chunks; the gocam-viewer chunk is ~850 kB and
+dominates the build. `rollup-plugin-visualizer` writes `stats-*.html` into the output dir.
 
 ## Enforced patterns
 
@@ -109,11 +110,11 @@ the build. `rollup-plugin-visualizer` writes `stats-*.html` into the output dir.
 - **No react-router.** One page, two query params, read straight off
   `window.location.search`.
 - **Unused parameters** — prefix with `_`.
-- `<wc-gocam-viz>` styling lives in `src/styles/gocam-viz.css`. The component renders into a
-  shadow root, so Tailwind utilities cannot reach inside it — cross the boundary with the
+- `<go-gocam-viewer>` styling lives in `src/styles/go-gocam-viewer.css`. The component
+  renders into a shadow root, so Tailwind utilities cannot reach inside it — cross the boundary with the
   documented CSS custom properties and `::part()` only.
-- The JSX declaration for `<wc-gocam-viz>` is in `src/types/wc-gocam-viz.d.ts`, which **must**
-  stay a module (it has a top-level import). The same `declare module 'react'` block in a
+- The JSX declaration for `<go-gocam-viewer>` is in `src/types/go-gocam-viewer.d.ts`, which
+  **must** stay a module (it has a top-level import). The same `declare module 'react'` block in a
   global script file replaces React's types instead of augmenting them.
 
 ## Conventions

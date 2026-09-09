@@ -7,13 +7,13 @@ const setModelData = vi.fn<(model: unknown) => Promise<void>>()
 
 // Stand in for the real Stencil element. GoCamViz waits on
 // customElements.whenDefined(), so the tag has to actually be registered.
-class FakeGoCamViz extends HTMLElement {
+class FakeGoCamViewer extends HTMLElement {
   setModelData = setModelData.mockResolvedValue(undefined)
   componentOnReady = () => Promise.resolve(this)
 }
 
 beforeAll(() => {
-  customElements.define('wc-gocam-viz', FakeGoCamViz)
+  customElements.define('go-gocam-viewer', FakeGoCamViewer)
 })
 
 describe('GoCamViz', () => {

@@ -1,10 +1,10 @@
-/* Theming for the <wc-gocam-viz> Stencil element.
+/* Theming for the <go-gocam-viewer> Stencil element.
    The component renders into a shadow root, so Tailwind utilities can't reach
    inside it — everything below crosses the boundary via custom properties and
    ::part(). Ported from the Angular app's
    src/app/main/apps/noctua-pathway/noctua-pathway.component.scss */
 
-wc-gocam-viz {
+go-gocam-viewer {
   display: block;
   width: 100%;
   background-color: #fff;
@@ -53,15 +53,15 @@ wc-gocam-viz {
   --graph-padding: 1rem;
 }
 
-wc-gocam-viz::part(gene-product) {
+go-gocam-viewer::part(gene-product) {
   font-size: 1.125rem;
   font-weight: bold;
 }
 
-wc-gocam-viz::part(legend-header) {
+go-gocam-viewer::part(legend-header) {
   text-align: center;
 }
 
-wc-gocam-viz::part(gocam-title) {
+go-gocam-viewer::part(gocam-title) {
   font-weight: bold;
 }
