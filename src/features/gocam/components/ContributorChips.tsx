@@ -34,7 +34,7 @@ const ContributorChips: React.FC<ContributorChipsProps> = ({ contributors }) => 
             circleClass={USER_CIRCLE}
             className="max-w-[200px]"
           >
-            {contributor.name}
+            {contributor.name ?? contributor.uri}
           </Chip>
         ))}
 
@@ -57,7 +57,7 @@ const ContributorChips: React.FC<ContributorChipsProps> = ({ contributors }) => 
                     <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-noc-chip-user text-noc-chip-user-icon">
                       <FaUser size={11} />
                     </div>
-                    <span>{contributor.name}</span>
+                    <span>{contributor.name ?? contributor.uri}</span>
                   </div>
                 </MenuItem>
               ))}

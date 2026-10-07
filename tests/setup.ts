@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest'
+import { afterEach, vi } from 'vitest'
 
 // jsdom lacks window.matchMedia; Mantine's MantineProvider color-scheme logic
 // calls it on mount. Provide a stub so component tests can render Mantine
@@ -27,3 +28,11 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     disconnect() {}
   } as unknown as typeof ResizeObserver
 }
+
+// Tests stub `fetch` and seed localStorage / the URL; reset all three so files
+// and cases don't leak into each other.
+afterEach(() => {
+  vi.unstubAllGlobals()
+  localStorage.clear()
+  window.history.replaceState(null, '', '/')
+})

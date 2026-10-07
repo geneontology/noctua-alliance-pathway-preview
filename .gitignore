@@ -42,3 +42,6 @@ downloads
 playwright-report/
 test-results/
 playwright/.cache/
+
+# Vitest coverage
+coverage/
