@@ -9,9 +9,9 @@ import { renderWithProviders } from '@tests/test-utils'
 
 const meta = parseModelMetadata(minervaModel)
 
-// ToolbarLinkMenu nests each <a> inside a MenuItem <button>, and a button's
-// contents are presentational to ARIA, so the links have no `link` role to
-// query by. Find them by label instead.
+// jsdom lays everything out at 0x0, so AnchoredMenu leaves its popup at
+// `visibility: hidden`, and hidden text gives a link no accessible name.
+// Find menu links by their text instead of by role + name.
 const menuLink = async (label: string) => (await screen.findByText(label)).closest('a')!
 
 const KNOWN_USERS: Partial<RootState> = {
@@ -60,6 +60,17 @@ describe('ModelBar', () => {
     expect(href.searchParams.get('model_id')).toBe(meta.id)
     expect(href.searchParams.get('barista_token')).toBe('tok-123')
     expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('lists the viewers in VIEW IN, without the Standard Annotations Editor', async () => {
+    const { user } = renderWithProviders(<ModelBar meta={meta} />)
+
+    await user.click(screen.getByRole('button', { name: 'VIEW IN' }))
+    await menuLink('Annotation Preview')
+
+    const labels = screen.getAllByRole('link', { hidden: true }).map(a => a.textContent)
+    expect(labels).toEqual(['Annotation Preview', 'Visual Pathway Editor', 'Graph Editor'])
+    expect(screen.queryByText('Standard Annotations Editor')).not.toBeInTheDocument()
   })
 
   it('offers GPAD and OWL downloads', async () => {

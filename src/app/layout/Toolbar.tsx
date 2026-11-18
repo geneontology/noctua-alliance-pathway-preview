@@ -90,15 +90,8 @@ const Toolbar: React.FC = () => {
             Help
           </Button>
           <AnchoredMenu anchorEl={helpMenu.anchor} open={helpMenu.isOpen} onClose={helpMenu.close}>
-            <MenuItem onClick={helpMenu.close}>
-              <a
-                href={EXTERNAL_LINKS.NOCTUA_USERS_GUIDE}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full"
-              >
-                Noctua User&apos;s Guide
-              </a>
+            <MenuItem href={EXTERNAL_LINKS.NOCTUA_USERS_GUIDE} onClick={helpMenu.close}>
+              Noctua User&apos;s Guide
             </MenuItem>
           </AnchoredMenu>
         </div>

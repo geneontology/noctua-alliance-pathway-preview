@@ -75,7 +75,6 @@ const ModelBar: React.FC<ModelBarProps> = ({ meta }) => {
             items={[
               { label: 'Annotation Preview', href: urls.annotationPreview },
               { label: 'Visual Pathway Editor', href: urls.visualPathwayEditor },
-              { label: 'Standard Annotations Editor', href: urls.standardAnnotations },
               { label: 'Graph Editor', href: urls.graphEditor },
             ]}
           />
